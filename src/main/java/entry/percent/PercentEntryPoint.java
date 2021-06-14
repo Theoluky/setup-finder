@@ -42,7 +42,7 @@ public class PercentEntryPoint implements EntryPoint {
     public PercentEntryPoint(PercentSettings settings) throws FinderInitializeException {
         this.settings = settings;
 
-        // ログファイルの出力先を整備
+        // Improve the output destination of the log file
         String logFilePath = settings.getLogFilePath();
         MyFile logFile = new MyFile(logFilePath);
 
@@ -72,7 +72,7 @@ public class PercentEntryPoint implements EntryPoint {
         output(FieldView.toString(field, maxClearLine));
 
         // Setup max depth
-        int maxDepth = Verify.maxDepth(field, maxClearLine);  // パフェに必要なミノ数
+        int maxDepth = Verify.maxDepth(field, maxClearLine);  // Number of minoes required for parfait
 
         output();
 

@@ -16,18 +16,18 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BuildUp {
-    // 指定した手順で組み立てられるか確認
+    // Check if it can be assembled according to the specified procedure
     public static boolean cansBuild(Field fieldOrigin, List<MinoOperationWithKey> operationWithKeys, int height, Reachable reachable) {
         Field field = fieldOrigin.freeze(height);
         for (MinoOperationWithKey operationWithKey : operationWithKeys) {
             long deleteKey = field.clearLineReturnKey();
             long needDeletedKey = operationWithKey.getNeedDeletedKey();
             if ((deleteKey & needDeletedKey) != needDeletedKey) {
-                // 必要な列が消えていない
+                // Required columns have not disappeared
                 return false;
             }
 
-            // すでに下のラインが消えているときは、その分スライドさせる
+            // If the lower line has already disappeared, slide it by that amount
             int originalY = operationWithKey.getY();
             int deletedLines = Long.bitCount(KeyOperators.getMaskForKeyBelowY(originalY) & deleteKey);
 
@@ -46,7 +46,7 @@ public class BuildUp {
         return true;
     }
 
-    // 組み立てられる手順が存在するか確認
+    //Check if there is a procedure to be assembled
     public static boolean existsValidBuildPattern(Field fieldOrigin, Stream<? extends MinoOperationWithKey> operationWithKeys, int height, Reachable reachable) {
         LinkedList<MinoOperationWithKey> keys = operationWithKeys.collect(Collectors.toCollection(LinkedList::new));
         return existsValidBuildPatternDirectly(fieldOrigin, keys, height, reachable);
