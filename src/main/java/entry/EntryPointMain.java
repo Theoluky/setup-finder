@@ -12,6 +12,10 @@ import entry.path.PathEntryPoint;
 import entry.path.PathOptions;
 import entry.path.PathSettingParser;
 import entry.path.PathSettings;
+import entry.pcsetup.PCSetupEntryPoint;
+import entry.pcsetup.PCSetupOptions;
+import entry.pcsetup.PCSetupSettingParser;
+import entry.pcsetup.PCSetupSettings;
 import entry.percent.PercentEntryPoint;
 import entry.percent.PercentOptions;
 import entry.percent.PercentSettingParser;
@@ -43,6 +47,7 @@ import exceptions.FinderInitializeException;
 import exceptions.FinderParseException;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import java.io.*;
@@ -225,8 +230,16 @@ public class EntryPointMain {
     }
 
     private static Optional<EntryPoint> getPCSetupEntryPoint(List<String> commands) throws FinderInitializeException, FinderParseException {
-        System.out.println("In PC Setup Entry Point :)");
-        return Optional.empty();
+        Options options = PCSetupOptions.create();
+        CommandLineParser parser = new DefaultParser();
+        PCSetupSettingParser settingParser = new PCSetupSettingParser(options, parser);
+        Optional<PCSetupSettings> settingsOptional = settingParser.parse(commands);
+        if (settingsOptional.isPresent()) {
+            PCSetupSettings settings = settingsOptional.get();
+            return Optional.of(new PCSetupEntryPoint(settings));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private static Optional<EntryPoint> getPercentEntryPoint(List<String> commands) throws FinderInitializeException, FinderParseException {
