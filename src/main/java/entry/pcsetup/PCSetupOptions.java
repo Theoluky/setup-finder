@@ -9,7 +9,9 @@ import org.apache.commons.cli.Options;
 public enum PCSetupOptions {
     Help(NoArgOption.full("h", "help", "Usage")),
     SetupPatterns(SingleArgOption.full("sp","setup-patterns", "definition", "Specify pattern definition to build setup, directly")),
+    SetupPatternsPath(SingleArgOption.full("spp", "setup-patterns-path", "path", "File path of setup pattern definition")),
     SolvePatterns(SingleArgOption.full("p", "solve-patterns","definition", "Specify pattern definition to solve setup, directly")),
+    SolvePatternsPath(SingleArgOption.full("pp", "solve-patterns-path", "path", "File path of solve pattern definition")),
     Hold(SingleArgOption.full("H", "hold", "use or avoid", "If use hold, set 'use'. If not use hold, set 'avoid'")),
     Drop(SingleArgOption.full("d", "drop", "hard or soft", "Specify drop")),
     Threads(SingleArgOption.full("th", "threads", "number", "Specify number of used thread")),

@@ -18,7 +18,8 @@ public class PCSetupSettings {
     private int maxClearLine = 4;
     private Field field = null;
     private String logFilePath = DEFAULT_LOG_FILE_PATH;
-    private List<String> patterns = new ArrayList<>();
+    private List<String> setup_patterns = new ArrayList<>();
+    private List<String> solve_patterns = new ArrayList<>();
     private int treeDepth = 3;
     private int failedCount = 100;
     private int threadCount = -1;
@@ -45,9 +46,11 @@ public class PCSetupSettings {
         return logFilePath;
     }
 
-    List<String> getPatterns() {
-        return patterns;
+    List<String> getSetupPatterns() {
+        return setup_patterns;
     }
+
+    List<String> getSolvePatterns() {return solve_patterns; }
 
     int getTreeDepth() {
         return treeDepth;
@@ -95,9 +98,11 @@ public class PCSetupSettings {
         this.logFilePath = path;
     }
 
-    void setPatterns(List<String> patterns) {
-        this.patterns = patterns;
+    void setSolvePatterns(List<String> patterns) {
+        this.solve_patterns = patterns;
     }
+
+    void setSetupPatterns(List<String> patterns) { this.setup_patterns = patterns; }
 
     void setTreeDepth(int depth) {
         this.treeDepth = depth;
