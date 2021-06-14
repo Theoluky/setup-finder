@@ -74,8 +74,8 @@ public class PCSetupEntryPoint implements EntryPoint{
             throw new FinderExecuteException(e);
         }
 
-//        if (settings.isOutputToConsole())
-//            System.out.println(str);
+        if (settings.isOutputToConsole())
+            System.out.println(str);
     }
 
     private void flush() throws FinderExecuteException {
