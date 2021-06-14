@@ -217,9 +217,16 @@ public class EntryPointMain {
                 return getCoverEntryPoint(commands);
             case "spin":
                 return getSpinEntryPoint(commands);
+            case "pcsetup":
+                return getPCSetupEntryPoint(commands);
             default:
-                throw new IllegalArgumentException("Invalid type: Use percent, path, util, setup, move, ren, cover, spin");
+                throw new IllegalArgumentException("Invalid type: Use percent, path, util, setup, move, ren, cover, spin, pcsetup");
         }
+    }
+
+    private static Optional<EntryPoint> getPCSetupEntryPoint(List<String> commands) throws FinderInitializeException, FinderParseException {
+        System.out.println("In PC Setup Entry Point :)");
+        return Optional.empty();
     }
 
     private static Optional<EntryPoint> getPercentEntryPoint(List<String> commands) throws FinderInitializeException, FinderParseException {
