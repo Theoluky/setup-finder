@@ -61,6 +61,11 @@ public class PCSetupEntryPoint implements EntryPoint{
     @Override
     public void run() throws FinderException {
         output("# PC Setup Finder");
+        output("# Setup Queues:");
+        List<String> setup_patterns = settings.getSetupPatterns();
+        PatternGenerator generator = Verify.patterns(setup_patterns);
+        for (String pattern : setup_patterns)
+            output("   " + pattern);
     }
 
     private void output() throws FinderExecuteException {
