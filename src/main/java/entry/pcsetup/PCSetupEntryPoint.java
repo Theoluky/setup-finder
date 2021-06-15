@@ -46,10 +46,7 @@ import searcher.common.validator.PerfectValidator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -151,20 +148,21 @@ public class PCSetupEntryPoint implements EntryPoint{
             output("   -> " + using);
             TreeSet<Order> first = putter.first(field, piece.getPieceArray(), new LockedCandidate(minoFactory, minoShifter, minoRotation, maxClearLine), maxClearLine, setup_maxDepth);
             output(" Total fields found: " + first.size());
-            output("Checking first 100 fields");
+            //output("Checking first 9 fields");
 
             double highest_percent = 0.0;
             Field bestSetup = field;
 
             int i = 0;
-            for (Order order : first) {
+
+            Iterator<Order> iterator = first.descendingIterator();
+            while (iterator.hasNext()) {
                 i++;
-                if (i > 100) break;
+                if (i > 250) break;
+                Order order = iterator.next();
                 Stream<Operation> operationStream = order.getHistory().getOperationStream();
                 List<MinoOperationWithKey> operationWithKeys = OperationTransform.parseToOperationWithKeys(field, new Operations(operationStream), minoFactory, maxClearLine);
                 BlockField blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
-
-                // TODO: Convert blockfield to field
 
                 Field toCheckField = FieldFactory.createField(4);
                 for (MinoOperationWithKey operationWithKey : operationWithKeys) {
@@ -178,6 +176,8 @@ public class PCSetupEntryPoint implements EntryPoint{
                     highest_percent = percent;
                     bestSetup = toCheckField;
                 }
+
+                if (highest_percent == 1.0) break;
 
 
                 // use: percentCore.run(field, searchingPieces, maxClearLine, maxDepth)
