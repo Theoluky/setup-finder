@@ -91,7 +91,7 @@ public class PCSetupEntryPoint implements EntryPoint{
 
         int piecesDepth = generator.getDepth();
         int maxDepth = piecesDepth;
-        maxDepth = 10;
+        maxDepth = 10; // TODO: Does this need 10 depth?
         if (piecesDepth > 10 || piecesDepth < 1) {
             throw new FinderInitializeException("Must be less than 10 and more than 1 pieces for valid setup, has " + piecesDepth);
         }
