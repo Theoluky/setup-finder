@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * ホールドありの組み合わせから複数のホールドなしの組み合わせに分解し、重複を取り除く
+ * Break down from a combination with a hold into multiple combinations without a hold and remove duplicates
  */
 public class HoldBreakEnumeratePieces implements EnumeratePiecesCore {
     private final PatternGenerator generator;

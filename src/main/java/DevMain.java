@@ -13,9 +13,10 @@ public class DevMain {
 //        String command = "percent -t v115@wgF8FeG8CeB8GeC8DeF8GeB8JeAgH -p L,L,Z,S,Z,I,J,I,Z,T,O -c 7 --hold no";
 //        String command = "percent -t v115@wgF8FeG8CeB8GeC8DeF8GeB8JeAgH -p L,L,Z,S,Z,I,J,I,Z,T,O";
 //          String command = "percent -t v115@9gilwhDeR4glRpwhCeR4wwg0RpwhBeBtxwi0whCeBt?wwJeAgH -p *p4";
-          String command = "pcsetup -sp ISZL";
+         String command = "pcsetup -sp TSZ -p *!";
 //        String command = "percent -t v115@FfI8AeI8AeI8AeI8BeI8AeI8AeI8AeR8AeI8AeI8Ae?I8BeI8AeI8AeI8AeI8JeAgH -p III* -c 16";
 //        String command = "move -t v115@9gA8IeA8IeA8IeA8SeAgH -p [TIO]p2";
+//          String command = "move -t v115@vhAAgH -p TSZ";
 //        String command = "path -k solution -f csv -t v115@zgyhGexhHexhGeAtxhC8BeA8BtyhE8AtA8JeAgWBAV?AAAAvhAAAPBAUAAAA -P 2 -p [IJLOS]p5,S --split yes";
 //        String command = "path -t v115@9gB8HeC8GeE8EeF8NeAgWMA0no2ANI98AQPcQB";
 //        String command = "path -t v115@9gB8EeF8DeG8CeF8DeC8JeAgH -p I,*p3";

@@ -1,18 +1,32 @@
 package entry.pcsetup;
 
-import common.datastore.Pair;
+import common.datastore.*;
 import common.datastore.action.Action;
 import common.datastore.blocks.LongPieces;
 import common.datastore.blocks.Pieces;
+import common.datastore.order.Order;
+import common.parser.OperationTransform;
 import common.pattern.PatternGenerator;
+import common.tetfu.Tetfu;
+import common.tetfu.TetfuElement;
+import common.tetfu.common.ColorConverter;
+import common.tetfu.common.ColorType;
+import common.tetfu.field.ColoredField;
+import common.tetfu.field.ColoredFieldFactory;
 import common.tree.AnalyzeTree;
 import concurrent.*;
 import core.FinderConstant;
 import core.action.candidate.Candidate;
+import core.action.candidate.LockedCandidate;
 import core.action.reachable.Reachable;
 import core.field.Field;
+import core.field.FieldFactory;
 import core.field.FieldView;
 import core.mino.MinoFactory;
+import core.mino.MinoShifter;
+import core.mino.Piece;
+import core.srs.MinoRotation;
+import core.srs.Rotate;
 import entry.DropType;
 import entry.EntryPoint;
 import entry.Verify;
@@ -25,15 +39,21 @@ import exceptions.FinderExecuteException;
 import exceptions.FinderInitializeException;
 import exceptions.FinderTerminateException;
 import lib.Stopwatch;
+import searcher.PutterNoHold;
+import searcher.PutterUsingHold;
+import searcher.common.validator.PerfectValidator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PCSetupEntryPoint implements EntryPoint{
     private static final String LINE_SEPARATOR = System.lineSeparator();
@@ -66,6 +86,101 @@ public class PCSetupEntryPoint implements EntryPoint{
         PatternGenerator generator = Verify.patterns(setup_patterns);
         for (String pattern : setup_patterns)
             output("   " + pattern);
+
+        ExecutorService executorService = createExecutorService();
+
+        int piecesDepth = generator.getDepth();
+        int maxDepth = piecesDepth;
+        maxDepth = 10;
+        if (piecesDepth > 10 || piecesDepth < 1) {
+            throw new FinderInitializeException("Must be less than 10 and more than 1 pieces for valid setup, has " + piecesDepth);
+        }
+//
+//        List<Pieces> piecesList = generator.blocksStream().collect(Collectors.toList());
+//        if (1 < piecesList.size())
+//            throw new FinderInitializeException("Should specify one sequence, not allow pattern(*) for multi sequences");
+
+        // here is where we start trying to find all possible setups
+
+        Field field = FieldFactory.createField(4);
+        int maxClearLine = 4;
+
+        MinoFactory minoFactory = new MinoFactory();
+        MinoShifter minoShifter = new MinoShifter();
+        MinoRotation minoRotation = MinoRotation.create();
+        ColorConverter colorConverter = new ColorConverter();
+        PerfectValidator perfectValidator = new PerfectValidator();
+        PutterNoHold<Action> putter = new PutterNoHold<>(minoFactory, perfectValidator);
+
+        output("Start Setup Finding");
+
+        List<Pieces> pieces = generator.blocksStream().collect(Collectors.toList());
+
+        for (Pieces piece : pieces) {
+            String using = piece.blockStream().map(Piece::getName).collect(Collectors.joining());
+            output("   -> " + using);
+            TreeSet<Order> first = putter.first(field, piece.getPieceArray(), new LockedCandidate(minoFactory, minoShifter, minoRotation, maxClearLine), maxClearLine, maxDepth);
+            for (Order order : first) {
+                Stream<Operation> operationStream = order.getHistory().getOperationStream();
+                List<MinoOperationWithKey> operationWithKeys = OperationTransform.parseToOperationWithKeys(field, new Operations(operationStream), minoFactory, maxClearLine);
+                BlockField blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
+
+                output("   --> " + using + " " + encodeColor(field, minoFactory, colorConverter, blockField));
+                output();
+            }
+        }
+
+
+    }
+
+    private String encodeColor(Field initField, MinoFactory minoFactory, ColorConverter colorConverter, BlockField blockField) {
+        TetfuElement tetfuElement = parseColorElement(initField, colorConverter, blockField, "");
+        return encodeOnePage(minoFactory, colorConverter, tetfuElement);
+    }
+
+    private TetfuElement parseColorElement(Field initField, ColorConverter colorConverter, BlockField blockField, String comment) {
+        ColoredField coloredField = ColoredFieldFactory.createGrayField(initField);
+
+        for (Piece piece : Piece.values()) {
+            Field target = blockField.get(piece);
+            ColorType colorType = colorConverter.parseToColorType(piece);
+            fillInField(coloredField, colorType, target);
+        }
+
+        return new TetfuElement(coloredField, ColorType.Empty, Rotate.Reverse, 0, 0, comment);
+    }
+
+    private void fillInField(ColoredField coloredField, ColorType colorType, Field target) {
+        for (int y = 0; y < target.getMaxFieldHeight(); y++) {
+            for (int x = 0; x < 10; x++) {
+                if (!target.isEmpty(x, y))
+                    coloredField.setColorType(colorType, x, y);
+            }
+        }
+    }
+
+    private String encodeOnePage(MinoFactory minoFactory, ColorConverter colorConverter, TetfuElement tetfuElement) {
+        Tetfu tetfu = new Tetfu(minoFactory, colorConverter);
+        List<TetfuElement> elementOnePage = Collections.singletonList(tetfuElement);
+        return "v115@" + tetfu.encode(elementOnePage);
+    }
+
+    private ExecutorService createExecutorService() throws FinderExecuteException {
+        int threadCount = settings.getThreadCount();
+        if (threadCount == 1) {
+            // single thread
+            output("Threads = 1");
+            return null;
+        } else if (1 < threadCount) {
+            // Specified thread count
+            output("Threads = " + threadCount);
+            return Executors.newFixedThreadPool(threadCount);
+        } else {
+            // NOT specified thread count
+            int core = Runtime.getRuntime().availableProcessors();
+            output("Threads = " + core);
+            return Executors.newFixedThreadPool(core);
+        }
     }
 
     private void output() throws FinderExecuteException {
