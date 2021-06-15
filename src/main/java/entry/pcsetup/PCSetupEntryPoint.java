@@ -159,7 +159,7 @@ public class PCSetupEntryPoint implements EntryPoint{
             //while (iterator.hasNext()) {
             for (Order order : first) {
                 i++;
-                if (i > 10) break;
+                if (i > 3) break;
                 //Order order = iterator.next();
                 Stream<Operation> operationStream = order.getHistory().getOperationStream();
                 List<MinoOperationWithKey> operationWithKeys = OperationTransform.parseToOperationWithKeys(field, new Operations(operationStream), minoFactory, maxClearLine);

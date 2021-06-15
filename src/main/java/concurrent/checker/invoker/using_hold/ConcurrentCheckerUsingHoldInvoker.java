@@ -15,12 +15,12 @@ import java.util.concurrent.*;
 public class ConcurrentCheckerUsingHoldInvoker implements ConcurrentCheckerInvoker {
     private final ExecutorService executorService;
     private final CheckerCommonObj commonObj;
-    private final CompletionService executorCompletionService;
+    private final CompletionService<Pair<Pieces,Boolean>> executorCompletionService;
 
     public ConcurrentCheckerUsingHoldInvoker(ExecutorService executorService, CheckerCommonObj commonObj) {
         this.executorService = executorService;
         this.commonObj = commonObj;
-        this.executorCompletionService = new ExecutorCompletionService<>(executorService);
+        this.executorCompletionService = new ExecutorCompletionService<>(this.executorService);
     }
 
     @Override
@@ -40,17 +40,42 @@ public class ConcurrentCheckerUsingHoldInvoker implements ConcurrentCheckerInvok
     }
 
     private ArrayList<Pair<Pieces, Boolean>> execute(ArrayList<Task> tasks) throws InterruptedException, ExecutionException {
-        List<Future<Pair<Pieces, Boolean>>> futureResults = executorService.invokeAll(tasks);
-
-        // 結果をリストに追加する
-        ArrayList<Pair<Pieces, Boolean>> pairs = new ArrayList<>();
-        //int failcount = 0;
-        // TODO: update to a CompletionService (https://stackoverflow.com/questions/19348248/waiting-on-a-list-of-future)
-        for (Future<Pair<Pieces, Boolean>> future : futureResults) {
-            //Pair<Pieces, Boolean> p = future.get();
-            pairs.add(future.get());
+        //List<Future<Pair<Pieces, Boolean>>> futureResults = executorService.invokeAll(tasks);
+        List<Future<Pair<Pieces,Boolean>>> futures = new ArrayList<>(tasks.size());
+        for (Task task : tasks) {
+            futures.add(executorCompletionService.submit(task));
         }
-        //System.out.println(failcount);
+        // 結果をリストに追加する
+        int toComplete = tasks.size();
+        int received = 0;
+        int failed = 0;
+        ArrayList<Pair<Pieces, Boolean>> pairs = new ArrayList<>();
+        // TODO: update to a CompletionService (https://stackoverflow.com/questions/19348248/waiting-on-a-list-of-future)
+        while (received < toComplete) {
+            Future<Pair<Pieces, Boolean>> resFuture = executorCompletionService.take();
+            Pair<Pieces, Boolean> res = resFuture.get();
+            if (!res.getValue()) {
+                failed++;
+            }
+            if (failed > 300) {
+                System.out.println("Cancelling all futures");
+                for (Future<Pair<Pieces, Boolean>> future : futures) {
+                    if (!future.isDone()) {
+                        future.cancel(true);
+                        System.out.println("Want to cancel, future not done");
+                    }
+                }
+                System.out.println("Cancelled futures");
+                break;
+            }
+            pairs.add(res);
+            received++;
+        }
+
+//        for (Future<Pair<Pieces, Boolean>> future : futureResults) {
+//            pairs.add(future.get());
+//        }
+        System.out.print("Had " + failed + " failures");
         return pairs;
     }
 }
