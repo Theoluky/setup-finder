@@ -34,6 +34,10 @@ public class Stopwatch {
         this.start = System.nanoTime();
     }
 
+    public long timesincestart() {
+        return (System.nanoTime() - this.start)/1000;
+    }
+
     public void stop() {
         if (!isStarted())
             return;

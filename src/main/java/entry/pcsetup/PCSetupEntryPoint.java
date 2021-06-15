@@ -153,14 +153,20 @@ public class PCSetupEntryPoint implements EntryPoint{
             double highest_percent = 0.0;
             Field bestSetup = field;
             int maxFailures = normalEnumeratePieces.getCounter();
-
             int i = 0;
+            output("  -> Stopwatch start");
+            Stopwatch stopwatch = Stopwatch.createStartedStopwatch();
+            long last100time = 0;
 
             //Iterator<Order> iterator = first.descendingIterator();
             //while (iterator.hasNext()) {
             for (Order order : first) {
                 i++;
-                if (i > 100) break;
+                if (i%10 == 0) {
+                    System.out.println("Searching " + i + "/" + first.size() + "\r");
+                    System.out.println("Last 10 took " + (stopwatch.timesincestart() - last100time) + "ms");
+                    last100time = stopwatch.timesincestart();
+                }
                 //Order order = iterator.next();
                 Stream<Operation> operationStream = order.getHistory().getOperationStream();
                 List<MinoOperationWithKey> operationWithKeys = OperationTransform.parseToOperationWithKeys(field, new Operations(operationStream), minoFactory, maxClearLine);
@@ -179,6 +185,11 @@ public class PCSetupEntryPoint implements EntryPoint{
                     maxFailures = percentCore.getResultTree().getFailures();
                     highest_percent = percent;
                     bestSetup = toCheckField;
+
+                    output("New Best Field:");
+                    output(FieldView.toString(toCheckField,maxClearLine));
+                    output(""+percent);
+                    output("Max Failures is now " + maxFailures);
                 }
 
                 if (highest_percent == 1.0) break;
@@ -194,6 +205,9 @@ public class PCSetupEntryPoint implements EntryPoint{
                 //output("   --> " + using + " " + encodeColor(field, minoFactory, colorConverter, blockField));
                 //output();
             }
+
+            stopwatch.stop();
+            output("  -> Stopwatch stop : " + stopwatch.toMessage(TimeUnit.MILLISECONDS));
 
             output("Best success percent: " + highest_percent);
             if (highest_percent > 0) {
