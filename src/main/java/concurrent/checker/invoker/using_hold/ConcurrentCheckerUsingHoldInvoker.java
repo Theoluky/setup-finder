@@ -10,17 +10,17 @@ import exceptions.FinderExecuteException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 public class ConcurrentCheckerUsingHoldInvoker implements ConcurrentCheckerInvoker {
     private final ExecutorService executorService;
     private final CheckerCommonObj commonObj;
+    private final CompletionService executorCompletionService;
 
     public ConcurrentCheckerUsingHoldInvoker(ExecutorService executorService, CheckerCommonObj commonObj) {
         this.executorService = executorService;
         this.commonObj = commonObj;
+        this.executorCompletionService = new ExecutorCompletionService<>(executorService);
     }
 
     @Override
