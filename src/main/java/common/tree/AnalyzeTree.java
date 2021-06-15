@@ -84,6 +84,10 @@ public class AnalyzeTree {
         return String.format("success = %.2f%% (%d/%d)", rootElement.getSuccessPercent() * 100, rootElement.successCounter, rootElement.allCounter);
     }
 
+    public double successPercent() {
+        return rootElement.getSuccessPercent();
+    }
+
     public void set(boolean result, List<Piece> pieces) {
         if (result)
             success(pieces);

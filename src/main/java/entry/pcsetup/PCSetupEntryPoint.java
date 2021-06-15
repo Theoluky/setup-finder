@@ -151,11 +151,15 @@ public class PCSetupEntryPoint implements EntryPoint{
             output("   -> " + using);
             TreeSet<Order> first = putter.first(field, piece.getPieceArray(), new LockedCandidate(minoFactory, minoShifter, minoRotation, maxClearLine), maxClearLine, setup_maxDepth);
             output(" Total fields found: " + first.size());
-            output("Checking first 10 fields");
+            output("Checking first 100 fields");
+
+            double highest_percent = 0.0;
+            Field bestSetup = field;
+
             int i = 0;
             for (Order order : first) {
                 i++;
-                if (i > 10) break;
+                if (i > 100) break;
                 Stream<Operation> operationStream = order.getHistory().getOperationStream();
                 List<MinoOperationWithKey> operationWithKeys = OperationTransform.parseToOperationWithKeys(field, new Operations(operationStream), minoFactory, maxClearLine);
                 BlockField blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
@@ -169,9 +173,11 @@ public class PCSetupEntryPoint implements EntryPoint{
                 }
                 //output(FieldView.toString(toCheckField,maxClearLine));
                 percentCore.run(toCheckField, searchingPieces, maxClearLine, solve_maxDepth);
-                AnalyzeTree tree = percentCore.getResultTree();
-                output(tree.show());
-                output();
+                double percent = percentCore.getResultTree().getSuccessPercent();
+                if (percent > highest_percent) {
+                    highest_percent = percent;
+                    bestSetup = toCheckField;
+                }
 
 
                 // use: percentCore.run(field, searchingPieces, maxClearLine, maxDepth)
@@ -183,6 +189,14 @@ public class PCSetupEntryPoint implements EntryPoint{
 
                 //output("   --> " + using + " " + encodeColor(field, minoFactory, colorConverter, blockField));
                 //output();
+            }
+
+            output("Best success percent: " + highest_percent);
+            if (highest_percent > 0) {
+                output("Best setup:");
+                output(FieldView.toString(bestSetup));
+            } else {
+                output("No viable setup found");
             }
         }
 
