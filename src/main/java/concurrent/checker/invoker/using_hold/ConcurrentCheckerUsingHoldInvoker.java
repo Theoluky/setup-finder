@@ -44,8 +44,13 @@ public class ConcurrentCheckerUsingHoldInvoker implements ConcurrentCheckerInvok
 
         // 結果をリストに追加する
         ArrayList<Pair<Pieces, Boolean>> pairs = new ArrayList<>();
-        for (Future<Pair<Pieces, Boolean>> future : futureResults)
+        //int failcount = 0;
+        // TODO: update to a CompletionService (https://stackoverflow.com/questions/19348248/waiting-on-a-list-of-future)
+        for (Future<Pair<Pieces, Boolean>> future : futureResults) {
+            //Pair<Pieces, Boolean> p = future.get();
             pairs.add(future.get());
+        }
+        //System.out.println(failcount);
         return pairs;
     }
 }

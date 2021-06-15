@@ -155,11 +155,12 @@ public class PCSetupEntryPoint implements EntryPoint{
 
             int i = 0;
 
-            Iterator<Order> iterator = first.descendingIterator();
-            while (iterator.hasNext()) {
+            //Iterator<Order> iterator = first.descendingIterator();
+            //while (iterator.hasNext()) {
+            for (Order order : first) {
                 i++;
-                if (i > 250) break;
-                Order order = iterator.next();
+                if (i > 10) break;
+                //Order order = iterator.next();
                 Stream<Operation> operationStream = order.getHistory().getOperationStream();
                 List<MinoOperationWithKey> operationWithKeys = OperationTransform.parseToOperationWithKeys(field, new Operations(operationStream), minoFactory, maxClearLine);
                 BlockField blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
@@ -169,9 +170,10 @@ public class PCSetupEntryPoint implements EntryPoint{
                     toCheckField.put(operationWithKey.getMino(), operationWithKey.getX(), operationWithKey.getY());
                     //output("   " +  operationWithKey.getMino() + operationWithKey.getX() + operationWithKey.getY());
                 }
-                //output(FieldView.toString(toCheckField,maxClearLine));
+                output(FieldView.toString(toCheckField,maxClearLine));
                 percentCore.run(toCheckField, searchingPieces, maxClearLine, solve_maxDepth);
                 double percent = percentCore.getResultTree().getSuccessPercent();
+                output(""+percent);
                 if (percent > highest_percent) {
                     highest_percent = percent;
                     bestSetup = toCheckField;
