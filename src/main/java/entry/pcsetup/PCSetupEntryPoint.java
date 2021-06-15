@@ -151,10 +151,35 @@ public class PCSetupEntryPoint implements EntryPoint{
             output("   -> " + using);
             TreeSet<Order> first = putter.first(field, piece.getPieceArray(), new LockedCandidate(minoFactory, minoShifter, minoRotation, maxClearLine), maxClearLine, setup_maxDepth);
             output(" Total fields found: " + first.size());
+            output("Checking first 10 fields");
+            int i = 0;
             for (Order order : first) {
+                i++;
+                if (i > 10) break;
                 Stream<Operation> operationStream = order.getHistory().getOperationStream();
                 List<MinoOperationWithKey> operationWithKeys = OperationTransform.parseToOperationWithKeys(field, new Operations(operationStream), minoFactory, maxClearLine);
                 BlockField blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
+
+                // TODO: Convert blockfield to field
+
+                Field toCheckField = FieldFactory.createField(4);
+                for (MinoOperationWithKey operationWithKey : operationWithKeys) {
+                    toCheckField.put(operationWithKey.getMino(), operationWithKey.getX(), operationWithKey.getY());
+                    //output("   " +  operationWithKey.getMino() + operationWithKey.getX() + operationWithKey.getY());
+                }
+                //output(FieldView.toString(toCheckField,maxClearLine));
+                percentCore.run(toCheckField, searchingPieces, maxClearLine, solve_maxDepth);
+                AnalyzeTree tree = percentCore.getResultTree();
+                output(tree.show());
+                output();
+
+
+                // use: percentCore.run(field, searchingPieces, maxClearLine, maxDepth)
+                // AnalyzeTree tree = percentCore.getResultTree();
+                // tree.show() gives percent
+
+
+
 
                 //output("   --> " + using + " " + encodeColor(field, minoFactory, colorConverter, blockField));
                 //output();

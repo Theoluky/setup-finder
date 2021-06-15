@@ -57,7 +57,7 @@ public class PercentCore {
         }
     }
 
-    void run(Field field, Set<LongPieces> searchingPiecesSet, int maxClearLine, int maxDepth) throws FinderExecuteException {
+    public void run(Field field, Set<LongPieces> searchingPiecesSet, int maxClearLine, int maxDepth) throws FinderExecuteException {
         List<Pieces> searchingPieces = new ArrayList<>(searchingPiecesSet);
 
         this.resultPairs = invoker.search(field, searchingPieces, maxClearLine, maxDepth);
@@ -71,7 +71,7 @@ public class PercentCore {
         }
     }
 
-    AnalyzeTree getResultTree() {
+    public AnalyzeTree getResultTree() {
         return resultTree;
     }
 
