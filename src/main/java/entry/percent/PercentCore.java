@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-class PercentCore {
+public class PercentCore {
     private final ConcurrentCheckerInvoker invoker;
 
     private AnalyzeTree resultTree;
@@ -34,7 +34,7 @@ class PercentCore {
         this.invoker = createConcurrentCheckerInvoker(null, candidateThreadLocal, isUsingHold, reachableThreadLocal, minoFactory);
     }
 
-    PercentCore(ExecutorService executorService, ThreadLocal<? extends Candidate<Action>> candidateThreadLocal, boolean isUsingHold, ThreadLocal<? extends Reachable> reachableThreadLocal, MinoFactory minoFactory) {
+    public PercentCore(ExecutorService executorService, ThreadLocal<? extends Candidate<Action>> candidateThreadLocal, boolean isUsingHold, ThreadLocal<? extends Reachable> reachableThreadLocal, MinoFactory minoFactory) {
         this.invoker = createConcurrentCheckerInvoker(executorService, candidateThreadLocal, isUsingHold, reachableThreadLocal, minoFactory);
     }
 

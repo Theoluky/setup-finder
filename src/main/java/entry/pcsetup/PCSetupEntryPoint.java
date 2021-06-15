@@ -32,6 +32,7 @@ import entry.EntryPoint;
 import entry.Verify;
 import entry.path.output.MyFile;
 import entry.pcsetup.PCSetupSettings;
+import entry.percent.PercentCore;
 import entry.percent.PercentSettings;
 import entry.searching_pieces.NormalEnumeratePieces;
 import exceptions.FinderException;
@@ -80,30 +81,59 @@ public class PCSetupEntryPoint implements EntryPoint{
 
     @Override
     public void run() throws FinderException {
-        output("# PC Setup Finder");
-        output("# Setup Queues:");
+        output("# Setup");
+        output("Queues:");
         List<String> setup_patterns = settings.getSetupPatterns();
-        PatternGenerator generator = Verify.patterns(setup_patterns);
+        PatternGenerator setup_generator = Verify.patterns(setup_patterns);
         for (String pattern : setup_patterns)
             output("   " + pattern);
+        output();
+
+        // depth info for setup
+        int setup_piecesDepth = setup_generator.getDepth();
+        int setup_maxDepth = setup_piecesDepth + 1;
+        if (setup_piecesDepth > 10 || setup_piecesDepth < 1) {
+            throw new FinderInitializeException("Must be less than 10 and more than 1 pieces for valid setup, has " + setup_piecesDepth);
+        }
+
+        output("# Solve");
+        output("Queues:");
+        List<String> solve_patterns = settings.getSolvePatterns();
+        PatternGenerator solve_generator = Verify.patterns(solve_patterns);
+        for (String pattern : solve_patterns)
+            output("   " + pattern);
+        output("Using hold: " + (settings.isUsingHold() ? "use" : "avoid"));
+        output("Drop: " + settings.getDropType().name().toLowerCase());
+
+        // pc solve initialization
+        int maxClearLine = 4;
+
+        int solve_maxDepth = 10 - setup_piecesDepth;
 
         ExecutorService executorService = createExecutorService();
+        output("# System Initialize");
+        output("Version = " + FinderConstant.VERSION);
+        output();
 
-        int piecesDepth = generator.getDepth();
-        int maxDepth = piecesDepth;
-        maxDepth = 10; // TODO: Does this need 10 depth?
-        if (piecesDepth > 10 || piecesDepth < 1) {
-            throw new FinderInitializeException("Must be less than 10 and more than 1 pieces for valid setup, has " + piecesDepth);
-        }
-//
-//        List<Pieces> piecesList = generator.blocksStream().collect(Collectors.toList());
-//        if (1 < piecesList.size())
-//            throw new FinderInitializeException("Should specify one sequence, not allow pattern(*) for multi sequences");
+        int solve_piecesDepth = solve_generator.getDepth();
+        int solve_popCount = settings.isUsingHold() && solve_maxDepth < solve_piecesDepth ? solve_maxDepth + 1 : solve_maxDepth;
+        output("Solve piece pop count = " + solve_popCount);
+        NormalEnumeratePieces normalEnumeratePieces = new NormalEnumeratePieces(solve_generator, solve_maxDepth, settings.isUsingHold());
+        Set<LongPieces> searchingPieces = normalEnumeratePieces.enumerate();
 
-        // here is where we start trying to find all possible setups
+        output("Searching pattern size for solve (duplicate) = " + normalEnumeratePieces.getCounter());
+        output("Searching pattern size for solve ( no dup. ) = " + searchingPieces.size());
 
+        output();
+
+        ThreadLocal<? extends Candidate<Action>> candidateThreadLocal = createCandidateThreadLocal(settings.getDropType(), maxClearLine);
+        ThreadLocal<? extends Reachable> reachableThreadLocal = createReachableThreadLocal(settings.getDropType(), maxClearLine);
+        MinoFactory solve_minoFactory = new MinoFactory();
+        PercentCore percentCore = new PercentCore(executorService, candidateThreadLocal, settings.isUsingHold(), reachableThreadLocal, solve_minoFactory);
+
+
+        // setup finding intialization:
         Field field = FieldFactory.createField(4);
-        int maxClearLine = 4;
 
         MinoFactory minoFactory = new MinoFactory();
         MinoShifter minoShifter = new MinoShifter();
@@ -114,19 +144,20 @@ public class PCSetupEntryPoint implements EntryPoint{
 
         output("Start Setup Finding");
 
-        List<Pieces> pieces = generator.blocksStream().collect(Collectors.toList());
+        List<Pieces> pieces = setup_generator.blocksStream().collect(Collectors.toList());
 
         for (Pieces piece : pieces) {
             String using = piece.blockStream().map(Piece::getName).collect(Collectors.joining());
             output("   -> " + using);
-            TreeSet<Order> first = putter.first(field, piece.getPieceArray(), new LockedCandidate(minoFactory, minoShifter, minoRotation, maxClearLine), maxClearLine, maxDepth);
+            TreeSet<Order> first = putter.first(field, piece.getPieceArray(), new LockedCandidate(minoFactory, minoShifter, minoRotation, maxClearLine), maxClearLine, setup_maxDepth);
+            output(" Total fields found: " + first.size());
             for (Order order : first) {
                 Stream<Operation> operationStream = order.getHistory().getOperationStream();
                 List<MinoOperationWithKey> operationWithKeys = OperationTransform.parseToOperationWithKeys(field, new Operations(operationStream), minoFactory, maxClearLine);
                 BlockField blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
 
-                output("   --> " + using + " " + encodeColor(field, minoFactory, colorConverter, blockField));
-                output();
+                //output("   --> " + using + " " + encodeColor(field, minoFactory, colorConverter, blockField));
+                //output();
             }
         }
 
@@ -181,6 +212,34 @@ public class PCSetupEntryPoint implements EntryPoint{
             output("Threads = " + core);
             return Executors.newFixedThreadPool(core);
         }
+    }
+
+    private ThreadLocal<? extends Candidate<Action>> createCandidateThreadLocal(DropType dropType, int maxClearLine) throws FinderInitializeException {
+        switch (dropType) {
+            case Softdrop:
+                return new LockedCandidateThreadLocal(maxClearLine);
+            case Harddrop:
+                return new HarddropCandidateThreadLocal();
+            case SoftdropTOnly:
+                return new SoftdropTOnlyCandidateThreadLocal(maxClearLine);
+            case Rotation180:
+                return new SRSAnd180CandidateThreadLocal(maxClearLine);
+        }
+        throw new FinderInitializeException("Unsupport droptype: droptype=" + dropType);
+    }
+
+    private ThreadLocal<? extends Reachable> createReachableThreadLocal(DropType dropType, int maxClearLine) throws FinderInitializeException {
+        switch (dropType) {
+            case Softdrop:
+                return new LockedReachableThreadLocal(maxClearLine);
+            case Harddrop:
+                return new HarddropReachableThreadLocal(maxClearLine);
+            case SoftdropTOnly:
+                return new SoftdropTOnlyReachableThreadLocal(maxClearLine);
+            case Rotation180:
+                return new SRSAnd180ReachableThreadLocal(maxClearLine);
+        }
+        throw new FinderInitializeException("Unsupport droptype: droptype=" + dropType);
     }
 
     private void output() throws FinderExecuteException {
