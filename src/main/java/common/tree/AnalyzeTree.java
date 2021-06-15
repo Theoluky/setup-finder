@@ -107,6 +107,10 @@ public class AnalyzeTree {
         return rootElement.getSuccessPercent();
     }
 
+    public int getFailures() {
+        return rootElement.allCounter - rootElement.successCounter;
+    }
+
     // TODO: write unittest
     public boolean isVisited(List<Piece> pieces) {
         return rootElement.isVisited(pieces, 0);

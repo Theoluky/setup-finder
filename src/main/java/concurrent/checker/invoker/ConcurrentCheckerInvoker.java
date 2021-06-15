@@ -10,4 +10,5 @@ import java.util.concurrent.ExecutionException;
 
 public interface ConcurrentCheckerInvoker {
     List<Pair<Pieces, Boolean>> search(Field field, List<Pieces> searchingPieces, int maxClearLine, int maxDepth) throws FinderExecuteException;
+    List<Pair<Pieces, Boolean>> search(Field field, List<Pieces> searchingPieces, int maxClearLine, int maxDepth, int maxFailures) throws FinderExecuteException;
 }

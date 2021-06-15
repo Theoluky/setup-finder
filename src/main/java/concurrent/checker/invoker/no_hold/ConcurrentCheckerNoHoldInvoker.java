@@ -39,6 +39,24 @@ public class ConcurrentCheckerNoHoldInvoker implements ConcurrentCheckerInvoker 
         }
     }
 
+    @Override
+    public List<Pair<Pieces, Boolean>> search(Field field, List<Pieces> searchingPieces, int maxClearLine, int maxDepth, int maxFailures) throws FinderExecuteException {
+        // currently identical to normal search
+
+        ConcurrentVisitedTree visitedTree = new ConcurrentVisitedTree();
+
+        Obj obj = new Obj(field, maxClearLine, maxDepth, visitedTree);
+        ArrayList<Task> tasks = new ArrayList<>();
+        for (Pieces target : searchingPieces)
+            tasks.add(new Task(obj, commonObj, target));
+
+        try {
+            return execute(tasks);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new FinderExecuteException(e);
+        }
+    }
+
     private ArrayList<Pair<Pieces, Boolean>> execute(ArrayList<Task> tasks) throws InterruptedException, ExecutionException {
         List<Future<Pair<Pieces, Boolean>>> futureResults = executorService.invokeAll(tasks);
 

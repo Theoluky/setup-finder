@@ -71,6 +71,20 @@ public class PercentCore {
         }
     }
 
+    public void run(Field field, Set<LongPieces> searchingPiecesSet, int maxClearLine, int maxDepth, int maxFailures) throws FinderExecuteException {
+        List<Pieces> searchingPieces = new ArrayList<>(searchingPiecesSet);
+
+        this.resultPairs = invoker.search(field, searchingPieces, maxClearLine, maxDepth, maxFailures);
+
+        // 最低限の探索結果を集計する
+        this.resultTree = new AnalyzeTree();
+        for (Pair<Pieces, Boolean> resultPair : resultPairs) {
+            Pieces pieces = resultPair.getKey();
+            Boolean result = resultPair.getValue();
+            resultTree.set(result, pieces);
+        }
+    }
+
     public AnalyzeTree getResultTree() {
         return resultTree;
     }
