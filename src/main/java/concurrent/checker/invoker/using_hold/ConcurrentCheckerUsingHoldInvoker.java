@@ -15,12 +15,14 @@ import java.util.concurrent.*;
 public class ConcurrentCheckerUsingHoldInvoker implements ConcurrentCheckerInvoker {
     private final ExecutorService executorService;
     private final CheckerCommonObj commonObj;
-    private final CompletionService<Pair<Pieces,Boolean>> executorCompletionService;
+    private final BlockingQueue<Future<Pair<Pieces,Boolean>>> executeQueue;
+    private CompletionService<Pair<Pieces,Boolean>> executorCompletionService;
 
     public ConcurrentCheckerUsingHoldInvoker(ExecutorService executorService, CheckerCommonObj commonObj) {
         this.executorService = executorService;
         this.commonObj = commonObj;
-        this.executorCompletionService = new ExecutorCompletionService<>(this.executorService);
+        this.executeQueue = new ArrayBlockingQueue<>(5040);
+        this.executorCompletionService = new ExecutorCompletionService<>(this.executorService, this.executeQueue);
     }
 
     @Override
@@ -83,10 +85,12 @@ public class ConcurrentCheckerUsingHoldInvoker implements ConcurrentCheckerInvok
         }
         if (failed > maxFailures) {
 //            System.out.println("Cancelling all futures");
-            while (received < toComplete) {
-                executorCompletionService.take();
-                received++;
-            }
+//            while (received < toComplete) {
+//                executorCompletionService.take();
+//                received++;
+//            }
+            executeQueue.clear();
+            //executorCompletionService = new ExecutorCompletionService<>(this.executorService);
 //            System.out.println("Cancelled futures");
         }
 
