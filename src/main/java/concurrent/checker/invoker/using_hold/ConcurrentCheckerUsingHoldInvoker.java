@@ -69,7 +69,6 @@ public class ConcurrentCheckerUsingHoldInvoker implements ConcurrentCheckerInvok
         int toComplete = tasks.size();
         int received = 0;
         int failed = 0;
-        maxFailures = toComplete;
         ArrayList<Pair<Pieces, Boolean>> pairs = new ArrayList<>();
         // TODO: update to a CompletionService (https://stackoverflow.com/questions/19348248/waiting-on-a-list-of-future)
 //        System.out.println("Starting to receive futures");
@@ -92,13 +91,9 @@ public class ConcurrentCheckerUsingHoldInvoker implements ConcurrentCheckerInvok
         }
         if (failed > maxFailures) {
            System.out.println("Cancelling all futures");
-           for (Future future : futures) {
-               if (!future.cancel(true) && !future.isDone()) {
-                   System.out.println("Cancel returned false");
-               }
-               if (!future.isCancelled() && !future.isDone()) {
-                   System.out.println("Problema");
-               }
+           executorService.getQueue().clear();
+           while (executorService.getActiveCount() > 0) {
+               executorCompletionService.take();
            }
 
            //futures.forEach(future -> future.cancel(true));
