@@ -13,16 +13,17 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class ConcurrentCheckerUsingHoldInvoker implements ConcurrentCheckerInvoker {
-    private final ExecutorService executorService;
+    private final ThreadPoolExecutor executorService;
     private final CheckerCommonObj commonObj;
-    private final BlockingQueue<Future<Pair<Pieces,Boolean>>> executeQueue;
-    private CompletionService<Pair<Pieces,Boolean>> executorCompletionService;
+//    private final BlockingQueue<Future<Pair<Pieces,Boolean>>> executeQueue;
+    private final CompletionService<Pair<Pieces,Boolean>> executorCompletionService;
 
-    public ConcurrentCheckerUsingHoldInvoker(ExecutorService executorService, CheckerCommonObj commonObj) {
+    public ConcurrentCheckerUsingHoldInvoker(ThreadPoolExecutor executorService, CheckerCommonObj commonObj) {
         this.executorService = executorService;
         this.commonObj = commonObj;
-        this.executeQueue = new ArrayBlockingQueue<>(5040);
-        this.executorCompletionService = new ExecutorCompletionService<>(this.executorService, this.executeQueue);
+ //       this.executeQueue = new ArrayBlockingQueue<>(5040);
+//        this.executorCompletionService = new ExecutorCompletionService<>(this.executorService, this.executeQueue);
+        this.executorCompletionService = new ExecutorCompletionService<>(this.executorService);
     }
 
     @Override
@@ -63,16 +64,22 @@ public class ConcurrentCheckerUsingHoldInvoker implements ConcurrentCheckerInvok
         for (Task task : tasks) {
             futures.add(executorCompletionService.submit(task));
         }
+
         // 結果をリストに追加する
         int toComplete = tasks.size();
         int received = 0;
         int failed = 0;
+        maxFailures = toComplete;
         ArrayList<Pair<Pieces, Boolean>> pairs = new ArrayList<>();
         // TODO: update to a CompletionService (https://stackoverflow.com/questions/19348248/waiting-on-a-list-of-future)
 //        System.out.println("Starting to receive futures");
         while (received < toComplete) {
             Future<Pair<Pieces, Boolean>> resFuture = executorCompletionService.take();
             received++;
+            if (resFuture.isCancelled()) {
+                System.out.println("Problema Grande");
+                continue;
+            }
             Pair<Pieces, Boolean> res = resFuture.get();
             if (!res.getValue()) {
                 failed++;
@@ -84,12 +91,23 @@ public class ConcurrentCheckerUsingHoldInvoker implements ConcurrentCheckerInvok
 
         }
         if (failed > maxFailures) {
-//            System.out.println("Cancelling all futures");
+           System.out.println("Cancelling all futures");
+           for (Future future : futures) {
+               if (!future.cancel(true) && !future.isDone()) {
+                   System.out.println("Cancel returned false");
+               }
+               if (!future.isCancelled() && !future.isDone()) {
+                   System.out.println("Problema");
+               }
+           }
+
+           //futures.forEach(future -> future.cancel(true));
+          // futures.clear();
 //            while (received < toComplete) {
 //                executorCompletionService.take();
 //                received++;
 //            }
-            executeQueue.clear();
+            //executeQueue.clear();
             //executorCompletionService = new ExecutorCompletionService<>(this.executorService);
 //            System.out.println("Cancelled futures");
         }

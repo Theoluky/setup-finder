@@ -31,20 +31,29 @@ class Task implements Callable<Pair<Pieces, Boolean>> {
     @Override
     public Pair<Pieces, Boolean> call() throws Exception {
         List<Piece> pieceList = target.getPieces();
-
+        if (Thread.currentThread().isInterrupted()) System.out.println("Interrupted 1");
         // すでに探索済みならそのまま結果を追加
         int succeed = obj.visitedTree.isSucceed(pieceList);
+        if (Thread.currentThread().isInterrupted()) System.out.println("Interrupted 2");
         if (succeed != VisitedTree.NO_RESULT)
             return new Pair<>(target, succeed == VisitedTree.SUCCEED);
-
+        if (Thread.currentThread().isInterrupted()) System.out.println("Interrupted 3");
         // 探索準備
         Checker<Action> checker = commonObj.checkerThreadLocal.get();
         Candidate<Action> candidate = commonObj.candidateThreadLocal.get();
-
+        if (Thread.currentThread().isInterrupted()) System.out.println("Interrupted 4");
         // 探索
         boolean checkResult = checker.check(obj.field, pieceList, candidate, obj.maxClearLine, obj.maxDepth);
+        if (Thread.currentThread().isInterrupted()) {
+            return null;
+        }
+        if (Thread.currentThread().isInterrupted()) System.out.println("Interrupted enye");
         obj.visitedTree.set(checkResult, pieceList);
-
+        // here we are often interrupted
+        if (Thread.currentThread().isInterrupted()) {
+            return null;
+        }
+        if (Thread.currentThread().isInterrupted()) System.out.println("Interrupted 5");
         // もし探索に成功した場合
         // パフェが見つかったツモ順(≠探索時のツモ順)へと、ホールドを使ってできるパターンを逆算
         if (checkResult) {
@@ -57,7 +66,7 @@ class Task implements Callable<Pair<Pieces, Boolean>> {
             OrderLookup.reverseBlocks(resultPieceList, reverseMaxDepth)
                     .forEach(piece -> obj.visitedTree.set(true, piece.toList()));
         }
-
+        if (Thread.currentThread().isInterrupted()) System.out.println("Interrupted 6");
         return new Pair<>(target, checkResult);
     }
 }

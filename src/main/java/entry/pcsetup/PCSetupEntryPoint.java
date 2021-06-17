@@ -47,9 +47,7 @@ import searcher.common.validator.PerfectValidator;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -126,7 +124,7 @@ public class PCSetupEntryPoint implements EntryPoint{
         ThreadLocal<? extends Candidate<Action>> candidateThreadLocal = createCandidateThreadLocal(settings.getDropType(), maxClearLine);
         ThreadLocal<? extends Reachable> reachableThreadLocal = createReachableThreadLocal(settings.getDropType(), maxClearLine);
         MinoFactory solve_minoFactory = new MinoFactory();
-        PercentCore percentCore = new PercentCore(executorService, candidateThreadLocal, settings.isUsingHold(), reachableThreadLocal, solve_minoFactory);
+        PercentCore percentCore = new PercentCore((ThreadPoolExecutor) executorService, candidateThreadLocal, settings.isUsingHold(), reachableThreadLocal, solve_minoFactory);
 
 
         // setup finding intialization:
@@ -162,11 +160,7 @@ public class PCSetupEntryPoint implements EntryPoint{
             //while (iterator.hasNext()) {
             for (Order order : first) {
                 i++;
-                if (i%10 == 0) {
-                    System.out.println("Searching " + i + "/" + first.size() + "\r");
-                    System.out.println("Last 10 took " + (stopwatch.timesincestart() - last100time) + "ms");
-                    last100time = stopwatch.timesincestart();
-                }
+                if (i > 10) break;
                 //Order order = iterator.next();
                 Stream<Operation> operationStream = order.getHistory().getOperationStream();
                 List<MinoOperationWithKey> operationWithKeys = OperationTransform.parseToOperationWithKeys(field, new Operations(operationStream), minoFactory, maxClearLine);
@@ -177,19 +171,19 @@ public class PCSetupEntryPoint implements EntryPoint{
                     toCheckField.put(operationWithKey.getMino(), operationWithKey.getX(), operationWithKey.getY());
                     //output("   " +  operationWithKey.getMino() + operationWithKey.getX() + operationWithKey.getY());
                 }
-                //output(FieldView.toString(toCheckField,maxClearLine));
+                output(FieldView.toString(toCheckField,maxClearLine));
                 percentCore.run(toCheckField, searchingPieces, maxClearLine, solve_maxDepth, maxFailures);
                 double percent = percentCore.getResultTree().getSuccessPercent();
-                //output(""+percent);
+                output(""+percent);
                 if (percent > highest_percent) {
                     maxFailures = percentCore.getResultTree().getFailures();
                     highest_percent = percent;
                     bestSetup = toCheckField;
 
-                    output("New Best Field:");
-                    output(FieldView.toString(toCheckField,maxClearLine));
-                    output(""+percent);
-                    output("Max Failures is now " + maxFailures);
+//                    output("New Best Field:");
+//                    output(FieldView.toString(toCheckField,maxClearLine));
+//                    output(""+percent);
+//                    output("Max Failures is now " + maxFailures);
                 }
 
                 if (highest_percent == 1.0) break;
@@ -262,12 +256,14 @@ public class PCSetupEntryPoint implements EntryPoint{
         } else if (1 < threadCount) {
             // Specified thread count
             output("Threads = " + threadCount);
-            return Executors.newFixedThreadPool(threadCount);
+            return new ThreadPoolExecutor(threadCount, threadCount, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+//            return Executors.newFixedThreadPool(threadCount);
         } else {
             // NOT specified thread count
             int core = Runtime.getRuntime().availableProcessors();
             output("Threads = " + core);
-            return Executors.newFixedThreadPool(core);
+            return new ThreadPoolExecutor(core, core, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+//            return Executors.newFixedThreadPool(core);
         }
     }
 

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -146,7 +147,7 @@ public class PercentEntryPoint implements EntryPoint {
         ThreadLocal<? extends Candidate<Action>> candidateThreadLocal = createCandidateThreadLocal(settings.getDropType(), maxClearLine);
         ThreadLocal<? extends Reachable> reachableThreadLocal = createReachableThreadLocal(settings.getDropType(), maxClearLine);
         MinoFactory minoFactory = new MinoFactory();
-        PercentCore percentCore = new PercentCore(executorService, candidateThreadLocal, settings.isUsingHold(), reachableThreadLocal, minoFactory);
+        PercentCore percentCore = new PercentCore((ThreadPoolExecutor) executorService, candidateThreadLocal, settings.isUsingHold(), reachableThreadLocal, minoFactory);
         percentCore.run(field, searchingPieces, maxClearLine, maxDepth);
 
         AnalyzeTree tree = percentCore.getResultTree();

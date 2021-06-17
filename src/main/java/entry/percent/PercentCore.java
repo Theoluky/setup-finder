@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class PercentCore {
     private final ConcurrentCheckerInvoker invoker;
@@ -34,14 +35,14 @@ public class PercentCore {
         this.invoker = createConcurrentCheckerInvoker(null, candidateThreadLocal, isUsingHold, reachableThreadLocal, minoFactory);
     }
 
-    public PercentCore(ExecutorService executorService, ThreadLocal<? extends Candidate<Action>> candidateThreadLocal, boolean isUsingHold, ThreadLocal<? extends Reachable> reachableThreadLocal, MinoFactory minoFactory) {
+    public PercentCore(ThreadPoolExecutor executorService, ThreadLocal<? extends Candidate<Action>> candidateThreadLocal, boolean isUsingHold, ThreadLocal<? extends Reachable> reachableThreadLocal, MinoFactory minoFactory) {
         this.invoker = createConcurrentCheckerInvoker(executorService, candidateThreadLocal, isUsingHold, reachableThreadLocal, minoFactory);
     }
 
     /**
      * Pass null to ExecutorService if executing on single thread
      */
-    private ConcurrentCheckerInvoker createConcurrentCheckerInvoker(ExecutorService executorService, ThreadLocal<? extends Candidate<Action>> candidateThreadLocal, boolean isUsingHold, ThreadLocal<? extends Reachable> reachableThreadLocal, MinoFactory minoFactory) {
+    private ConcurrentCheckerInvoker createConcurrentCheckerInvoker(ThreadPoolExecutor executorService, ThreadLocal<? extends Candidate<Action>> candidateThreadLocal, boolean isUsingHold, ThreadLocal<? extends Reachable> reachableThreadLocal, MinoFactory minoFactory) {
         if (isUsingHold) {
             CheckerUsingHoldThreadLocal<Action> checkerThreadLocal = new CheckerUsingHoldThreadLocal<>();
             CheckerCommonObj commonObj = new CheckerCommonObj(minoFactory, candidateThreadLocal, checkerThreadLocal, reachableThreadLocal);

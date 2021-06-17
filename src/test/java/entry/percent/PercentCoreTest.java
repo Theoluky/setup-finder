@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,7 +54,7 @@ class PercentCoreTest {
         NormalEnumeratePieces enumeratePieces = new NormalEnumeratePieces(generator, obj.maxDepth, obj.isUsingHold);
         Set<LongPieces> blocks = enumeratePieces.enumerate();
 
-        Optional<ExecutorService> executorService = obj.isSingleThread ? Optional.empty() : Optional.of(Executors.newCachedThreadPool());
+        Optional<ThreadPoolExecutor> executorService = obj.isSingleThread ? Optional.empty() : Optional.of((ThreadPoolExecutor)Executors.newCachedThreadPool());
         LockedCandidateThreadLocal candidateThreadLocal = new LockedCandidateThreadLocal(obj.maxClearLine);
         LockedReachableThreadLocal reachableThreadLocal = new LockedReachableThreadLocal(obj.maxClearLine);
         MinoFactory minoFactory = new MinoFactory();
@@ -68,7 +69,7 @@ class PercentCoreTest {
         assertThat(percentCore.getResultTree().getSuccessPercent()).isEqualTo(successPercent);
     }
 
-    private PercentCore getPercentCore(Obj obj, ExecutorService executorService, LockedCandidateThreadLocal candidateThreadLocal, LockedReachableThreadLocal reachableThreadLocal, MinoFactory minoFactory) {
+    private PercentCore getPercentCore(Obj obj, ThreadPoolExecutor executorService, LockedCandidateThreadLocal candidateThreadLocal, LockedReachableThreadLocal reachableThreadLocal, MinoFactory minoFactory) {
         if (executorService == null)
             return new PercentCore(candidateThreadLocal, obj.isUsingHold, reachableThreadLocal, minoFactory);
         return new PercentCore(executorService, candidateThreadLocal, obj.isUsingHold, reachableThreadLocal, minoFactory);

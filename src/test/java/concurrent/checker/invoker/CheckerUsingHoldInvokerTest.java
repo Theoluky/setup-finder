@@ -34,6 +34,7 @@ import searcher.common.validator.PerfectValidator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -379,7 +380,7 @@ class CheckerUsingHoldInvokerTest {
             LockedCandidateThreadLocal candidateThreadLocal = new LockedCandidateThreadLocal(maxClearLine);
             LockedReachableThreadLocal reachableThreadLocal = new LockedReachableThreadLocal(maxClearLine);
             CheckerCommonObj commonObj = new CheckerCommonObj(minoFactory, candidateThreadLocal, checkerThreadLocal, reachableThreadLocal);
-            return new ConcurrentCheckerUsingHoldInvoker(executorService, commonObj);
+            return new ConcurrentCheckerUsingHoldInvoker((ThreadPoolExecutor) executorService, commonObj);
         }
 
         private ConcurrentCheckerInvoker createSingleCheckerUsingHoldInvoker(int maxClearLine) {
