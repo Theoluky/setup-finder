@@ -39,6 +39,7 @@ import exceptions.FinderException;
 import exceptions.FinderExecuteException;
 import exceptions.FinderInitializeException;
 import exceptions.FinderTerminateException;
+import jdk.nashorn.internal.ir.Block;
 import lib.Stopwatch;
 import searcher.PutterNoHold;
 import searcher.PutterUsingHold;
@@ -148,6 +149,8 @@ public class PCSetupEntryPoint implements EntryPoint{
             output(" Total fields found: " + first.size());
             //output("Checking first 9 fields");
 
+            // TODO: Allow inputting of best-known pattern and set maxFailures based on it
+
             double highest_percent = 0.0;
             Field bestSetup = field;
             int maxFailures = normalEnumeratePieces.getCounter();
@@ -155,6 +158,7 @@ public class PCSetupEntryPoint implements EntryPoint{
             output("  -> Stopwatch start");
             Stopwatch stopwatch = Stopwatch.createStartedStopwatch();
             long last100time = 0;
+            BlockField blockField = null;
 
             //Iterator<Order> iterator = first.descendingIterator();
             //while (iterator.hasNext()) {
@@ -189,6 +193,7 @@ public class PCSetupEntryPoint implements EntryPoint{
                     output(FieldView.toString(toCheckField,maxClearLine));
                     output(""+percent);
                     output("Max Failures is now " + maxFailures);
+                    blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
                 }
 
                 if (highest_percent == 1.0) break;
@@ -212,6 +217,8 @@ public class PCSetupEntryPoint implements EntryPoint{
             if (highest_percent > 0) {
                 output("Best setup:");
                 output(FieldView.toString(bestSetup));
+                if (null != blockField)
+                    output(encodeColor(field, minoFactory, colorConverter, blockField));
             } else {
                 output("No viable setup found");
             }
