@@ -90,27 +90,16 @@ public class ConcurrentCheckerUsingHoldInvoker implements ConcurrentCheckerInvok
 
         }
         if (failed > maxFailures) {
-           System.out.println("Cancelling all futures");
+//           System.out.println("Cancelling all futures");
            executorService.getQueue().clear();
            while (executorService.getActiveCount() > 0) {
-               executorCompletionService.take();
+//               System.out.println("Clearing with " +executorService.getActiveCount());
+               executorCompletionService.poll();
+//               System.out.println("Cleared");
            }
 
-           //futures.forEach(future -> future.cancel(true));
-          // futures.clear();
-//            while (received < toComplete) {
-//                executorCompletionService.take();
-//                received++;
-//            }
-            //executeQueue.clear();
-            //executorCompletionService = new ExecutorCompletionService<>(this.executorService);
-//            System.out.println("Cancelled futures");
         }
 
-//        for (Future<Pair<Pieces, Boolean>> future : futureResults) {
-//            pairs.add(future.get());
-//        }
-//        System.out.print("Had " + failed + " failures");
         return pairs;
     }
 }

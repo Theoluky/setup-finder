@@ -151,7 +151,7 @@ public class PCSetupEntryPoint implements EntryPoint{
             double highest_percent = 0.0;
             Field bestSetup = field;
             int maxFailures = normalEnumeratePieces.getCounter();
-            int i = 0;
+            int checked = 0;
             output("  -> Stopwatch start");
             Stopwatch stopwatch = Stopwatch.createStartedStopwatch();
             long last100time = 0;
@@ -159,31 +159,36 @@ public class PCSetupEntryPoint implements EntryPoint{
             //Iterator<Order> iterator = first.descendingIterator();
             //while (iterator.hasNext()) {
             for (Order order : first) {
-                i++;
-                if (i > 10) break;
+                checked++;
+//                System.out.println(checked);
+                if (checked%100 == 0) {
+                    output("Checked " + checked + "/" + first.size());
+                    output("Last 100 took " + (stopwatch.timesincestart()-last100time));
+                    last100time = stopwatch.timesincestart();
+                }
                 //Order order = iterator.next();
                 Stream<Operation> operationStream = order.getHistory().getOperationStream();
                 List<MinoOperationWithKey> operationWithKeys = OperationTransform.parseToOperationWithKeys(field, new Operations(operationStream), minoFactory, maxClearLine);
-                BlockField blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
+//                BlockField blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
 
                 Field toCheckField = FieldFactory.createField(4);
                 for (MinoOperationWithKey operationWithKey : operationWithKeys) {
                     toCheckField.put(operationWithKey.getMino(), operationWithKey.getX(), operationWithKey.getY());
                     //output("   " +  operationWithKey.getMino() + operationWithKey.getX() + operationWithKey.getY());
                 }
-                output(FieldView.toString(toCheckField,maxClearLine));
+//                output(FieldView.toString(toCheckField,maxClearLine));
                 percentCore.run(toCheckField, searchingPieces, maxClearLine, solve_maxDepth, maxFailures);
                 double percent = percentCore.getResultTree().getSuccessPercent();
-                output(""+percent);
+//                output(""+percent);
                 if (percent > highest_percent) {
                     maxFailures = percentCore.getResultTree().getFailures();
                     highest_percent = percent;
                     bestSetup = toCheckField;
 
-//                    output("New Best Field:");
-//                    output(FieldView.toString(toCheckField,maxClearLine));
-//                    output(""+percent);
-//                    output("Max Failures is now " + maxFailures);
+                    output("New Best Field:");
+                    output(FieldView.toString(toCheckField,maxClearLine));
+                    output(""+percent);
+                    output("Max Failures is now " + maxFailures);
                 }
 
                 if (highest_percent == 1.0) break;
