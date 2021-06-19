@@ -177,7 +177,7 @@ public class PCSetupEntryPoint implements EntryPoint{
             //while (iterator.hasNext()) {
             for (Order order : first) {
                 checked++;
-                if (checked > 10) break;
+//                if (checked > 10) break;
                 if (checked%500 == 0) {
                     System.out.println("Checked " + checked + "/" + first.size() + ". Last 500 took " + (stopwatch.timesincestart()-last100time) + "\r");
 //                    output("Last 100 took " + (stopwatch.timesincestart()-last100time));
