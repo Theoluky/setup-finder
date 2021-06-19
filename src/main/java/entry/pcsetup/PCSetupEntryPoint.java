@@ -142,6 +142,10 @@ public class PCSetupEntryPoint implements EntryPoint{
 
         List<Pieces> pieces = setup_generator.blocksStream().collect(Collectors.toList());
 
+//        Field bestKnownSetup = settings.getBestKnownSetup();
+//        output("Best known setup:");
+//        output(FieldView.toString(bestKnownSetup, 4));
+
         for (Pieces piece : pieces) {
             String using = piece.blockStream().map(Piece::getName).collect(Collectors.joining());
             output("   -> " + using);
@@ -164,14 +168,12 @@ public class PCSetupEntryPoint implements EntryPoint{
             //while (iterator.hasNext()) {
             for (Order order : first) {
                 checked++;
-//                if (checked > 10) break;
-//                System.out.println(checked);
-                if (checked%100 == 0) {
-                    output("Checked " + checked + "/" + first.size());
-                    output("Last 100 took " + (stopwatch.timesincestart()-last100time));
+                if (checked > 10) break;
+                if (checked%500 == 0) {
+                    System.out.println("Checked " + checked + "/" + first.size() + ". Last 500 took " + (stopwatch.timesincestart()-last100time) + "\r");
+//                    output("Last 100 took " + (stopwatch.timesincestart()-last100time));
                     last100time = stopwatch.timesincestart();
                 }
-                //Order order = iterator.next();
                 Stream<Operation> operationStream = order.getHistory().getOperationStream();
                 List<MinoOperationWithKey> operationWithKeys = OperationTransform.parseToOperationWithKeys(field, new Operations(operationStream), minoFactory, maxClearLine);
 //                BlockField blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
@@ -216,7 +218,7 @@ public class PCSetupEntryPoint implements EntryPoint{
 
             output("Best success percent: " + highest_percent);
             if (highest_percent > 0) {
-                output("Best setup for " + piece.toString() + ":");
+                output("Best setup for " + piece.toString() + " with solve queue " + solve_patterns.toString() + ":");
                 output(FieldView.toString(bestSetup));
                 if (null != blockField)
                     output(encodeColor(field, minoFactory, colorConverter, blockField));

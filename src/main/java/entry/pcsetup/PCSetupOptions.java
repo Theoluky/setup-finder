@@ -15,7 +15,10 @@ public enum PCSetupOptions {
     Hold(SingleArgOption.full("H", "hold", "use or avoid", "If use hold, set 'use'. If not use hold, set 'avoid'")),
     Drop(SingleArgOption.full("d", "drop", "hard or soft", "Specify drop")),
     Threads(SingleArgOption.full("th", "threads", "number", "Specify number of used thread")),
-    LogPath(SingleArgOption.full("lp", "log-path", "path", "File path of output log")),;
+    LogPath(SingleArgOption.full("lp", "log-path", "path", "File path of output log")),
+    BestKnownSetup(SingleArgOption.full("bksf", "best-known-setup","v115@~","Specify fumen of best known setup")),
+    BestKnownSetupPage(SingleArgOption.full("bksp", "best-known-setup-page", "number", "Page of best known setup in fumen")),
+    BestKnownSetupPath(SingleArgOption.full("bksfp", "best-known-setup-path", "path", "Path to best known setup"));
 
     private final OptionBuilder optionBuilder;
 

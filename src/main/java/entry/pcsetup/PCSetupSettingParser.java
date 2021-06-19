@@ -17,6 +17,7 @@ import entry.percent.PercentSettings;
 import exceptions.FinderParseException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import java.nio.charset.Charset;
@@ -94,6 +95,50 @@ public class PCSetupSettingParser extends SettingParser<PCSetupSettings>{
 //        }
 
         // パターンの読み込み
+
+        Optional<FieldData> bestKnownSetup = Loader.loadFieldData(
+                wrapper,
+                fumenLoader,
+                PCSetupOptions.BestKnownSetupPage.optName(),
+                PCSetupOptions.BestKnownSetup.optName(),
+                PCSetupOptions.BestKnownSetupPath.optName(),
+                DEFAULT_FIELD_TXT,
+                Charset.forName(CHARSET_NAME),
+                Optional::of,
+                fieldLines-> {
+                    try {
+                        String firstLine = fieldLines.poll();
+                        int maxClearLine = Integer.valueOf(firstLine != null ? firstLine : "error");
+
+                        String fieldMarks = String.join("",fieldLines);
+                        ColoredField coloredField = ColoredFieldFactory.createColoredField(fieldMarks);
+
+                        CommandLine commandLineTetfu = commandLineFactory.parse(Arrays.asList("4"));
+                        CommandLineWrapper newWrapper = new NormalCommandLineWrapper(commandLineTetfu);
+
+                        return Optional.of(new FieldData(coloredField, newWrapper));
+
+                    } catch (NumberFormatException e) {
+                        throw new FinderParseException("Cannot read clear-line from field file");
+                    }
+                }
+        );
+
+        if (bestKnownSetup.isPresent()) {
+            FieldData fieldData = bestKnownSetup.get();
+
+            Optional<CommandLineWrapper> commandLineWrapper = fieldData.getCommandLineWrapper();
+            if (commandLineWrapper.isPresent()) {
+                wrapper = new PriorityCommandLineWrapper(Arrays.asList(wrapper, commandLineWrapper.get()));
+            }
+
+            int height = 4;
+            settings.setField(fieldData.toColoredField(), height);
+            settings.setMaxClearLine(height);
+        }
+
+
+
         List<String> setup_patterns = Loader.loadPatterns(
                 wrapper,
                 PCSetupOptions.SetupPatterns.optName(),

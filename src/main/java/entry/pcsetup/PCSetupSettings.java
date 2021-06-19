@@ -16,7 +16,7 @@ public class PCSetupSettings {
 
     private boolean isUsingHold = true;
     private int maxClearLine = 4;
-    private Field field = null;
+    private Field bestKnownSetup = null;
     private String logFilePath = DEFAULT_LOG_FILE_PATH;
     private List<String> setup_patterns = new ArrayList<>();
     private List<String> solve_patterns = new ArrayList<>();
@@ -34,8 +34,8 @@ public class PCSetupSettings {
         return true;
     }
 
-    Field getField() {
-        return field;
+    Field getBestKnownSetup() {
+        return bestKnownSetup;
     }
 
     int getMaxClearLine() {
@@ -77,7 +77,7 @@ public class PCSetupSettings {
         this.isUsingHold = isUsingHold;
     }
 
-    void setField(ColoredField coloredField) {
+    void setBestKnownSetup(ColoredField coloredField) {
         setField(coloredField, this.maxClearLine);
     }
 
@@ -91,7 +91,7 @@ public class PCSetupSettings {
     }
 
     void setFieldFilePath(Field field) {
-        this.field = field;
+        this.bestKnownSetup = field;
     }
 
     void setLogFilePath(String path) {

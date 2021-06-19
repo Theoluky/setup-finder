@@ -70,8 +70,6 @@ public class ConcurrentCheckerUsingHoldInvoker implements ConcurrentCheckerInvok
         int received = 0;
         int failed = 0;
         ArrayList<Pair<Pieces, Boolean>> pairs = new ArrayList<>();
-        // TODO: update to a CompletionService (https://stackoverflow.com/questions/19348248/waiting-on-a-list-of-future)
-//        System.out.println("Starting to receive futures");
         while (received < toComplete) {
             Future<Pair<Pieces, Boolean>> resFuture = executorCompletionService.take();
             received++;
