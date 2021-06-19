@@ -136,7 +136,7 @@ public class PCSetupEntryPoint implements EntryPoint{
         MinoRotation minoRotation = MinoRotation.create();
         ColorConverter colorConverter = new ColorConverter();
         PerfectValidator perfectValidator = new PerfectValidator();
-        PutterNoHold<Action> putter = new PutterNoHold<>(minoFactory, perfectValidator);
+        PutterUsingHold<Action> putter = new PutterUsingHold<>(minoFactory, perfectValidator);
 
         output("Start Setup Finding");
 
@@ -164,6 +164,7 @@ public class PCSetupEntryPoint implements EntryPoint{
             //while (iterator.hasNext()) {
             for (Order order : first) {
                 checked++;
+//                if (checked > 10) break;
 //                System.out.println(checked);
                 if (checked%100 == 0) {
                     output("Checked " + checked + "/" + first.size());
@@ -215,12 +216,12 @@ public class PCSetupEntryPoint implements EntryPoint{
 
             output("Best success percent: " + highest_percent);
             if (highest_percent > 0) {
-                output("Best setup:");
+                output("Best setup for " + piece.toString() + ":");
                 output(FieldView.toString(bestSetup));
                 if (null != blockField)
                     output(encodeColor(field, minoFactory, colorConverter, blockField));
             } else {
-                output("No viable setup found");
+                output("No viable setup found for " + piece.toString());
             }
         }
 
