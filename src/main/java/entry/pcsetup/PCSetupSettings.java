@@ -78,7 +78,8 @@ public class PCSetupSettings {
     }
 
     void setBestKnownSetup(ColoredField coloredField) {
-        setField(coloredField, this.maxClearLine);
+        if (coloredField != null)
+            setField(coloredField, this.maxClearLine);
     }
 
     void setField(ColoredField coloredField, int height) {

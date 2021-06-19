@@ -139,21 +139,15 @@ public class PCSetupEntryPoint implements EntryPoint{
         PutterUsingHold<Action> putter = new PutterUsingHold<>(minoFactory, perfectValidator);
 
         output("Start Setup Finding");
+        output();
 
         List<Pieces> pieces = setup_generator.blocksStream().collect(Collectors.toList());
 
-//        Field bestKnownSetup = settings.getBestKnownSetup();
-//        output("Best known setup:");
-//        output(FieldView.toString(bestKnownSetup, 4));
 
         for (Pieces piece : pieces) {
             String using = piece.blockStream().map(Piece::getName).collect(Collectors.joining());
             output("   -> " + using);
             TreeSet<Order> first = putter.first(field, piece.getPieceArray(), new LockedCandidate(minoFactory, minoShifter, minoRotation, maxClearLine), maxClearLine, setup_maxDepth);
-            output(" Total fields found: " + first.size());
-            //output("Checking first 9 fields");
-
-            // TODO: Allow inputting of best-known pattern and set maxFailures based on it
 
             double highest_percent = 0.0;
             Field bestSetup = field;
@@ -163,6 +157,21 @@ public class PCSetupEntryPoint implements EntryPoint{
             Stopwatch stopwatch = Stopwatch.createStartedStopwatch();
             long last100time = 0;
             BlockField blockField = null;
+
+            Field bestKnownSetup = settings.getBestKnownSetup();
+            if (bestKnownSetup != null) {
+                output("Best known setup:");
+                output(FieldView.toString(bestKnownSetup, 4));
+                percentCore.run(bestKnownSetup, searchingPieces, maxClearLine, solve_maxDepth, maxFailures);
+                highest_percent = percentCore.getResultTree().getSuccessPercent();
+                output("Best known setup percent: " + highest_percent);
+                bestSetup = bestKnownSetup;
+                maxFailures = percentCore.getResultTree().getFailures();
+            }
+
+            output(" Total fields found: " + first.size());
+            //output("Checking first 9 fields");
+
 
             //Iterator<Order> iterator = first.descendingIterator();
             //while (iterator.hasNext()) {

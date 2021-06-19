@@ -96,46 +96,51 @@ public class PCSetupSettingParser extends SettingParser<PCSetupSettings>{
 
         // パターンの読み込み
 
-        Optional<FieldData> bestKnownSetup = Loader.loadFieldData(
-                wrapper,
-                fumenLoader,
-                PCSetupOptions.BestKnownSetupPage.optName(),
-                PCSetupOptions.BestKnownSetup.optName(),
-                PCSetupOptions.BestKnownSetupPath.optName(),
-                DEFAULT_FIELD_TXT,
-                Charset.forName(CHARSET_NAME),
-                Optional::of,
-                fieldLines-> {
-                    try {
-                        String firstLine = fieldLines.poll();
-                        int maxClearLine = Integer.valueOf(firstLine != null ? firstLine : "error");
+        if (wrapper.getStringOption(PCSetupOptions.BestKnownSetup.optName()).isPresent() ||
+                wrapper.getStringOption(PCSetupOptions.BestKnownSetupPath.optName()).isPresent()) {
+            Optional<FieldData> bestKnownSetup = Loader.loadFieldData(
+                    wrapper,
+                    fumenLoader,
+                    PCSetupOptions.BestKnownSetupPage.optName(),
+                    PCSetupOptions.BestKnownSetup.optName(),
+                    PCSetupOptions.BestKnownSetupPath.optName(),
+                    DEFAULT_FIELD_TXT,
+                    Charset.forName(CHARSET_NAME),
+                    Optional::of,
+                    fieldLines -> {
+                        try {
+                            String firstLine = fieldLines.poll();
+                            int maxClearLine = Integer.valueOf(firstLine != null ? firstLine : "error");
 
-                        String fieldMarks = String.join("",fieldLines);
-                        ColoredField coloredField = ColoredFieldFactory.createColoredField(fieldMarks);
+                            String fieldMarks = String.join("", fieldLines);
+                            ColoredField coloredField = ColoredFieldFactory.createColoredField(fieldMarks);
 
-                        CommandLine commandLineTetfu = commandLineFactory.parse(Arrays.asList("4"));
-                        CommandLineWrapper newWrapper = new NormalCommandLineWrapper(commandLineTetfu);
+                            CommandLine commandLineTetfu = commandLineFactory.parse(Arrays.asList("4"));
+                            CommandLineWrapper newWrapper = new NormalCommandLineWrapper(commandLineTetfu);
 
-                        return Optional.of(new FieldData(coloredField, newWrapper));
+                            return Optional.of(new FieldData(coloredField, newWrapper));
 
-                    } catch (NumberFormatException e) {
-                        throw new FinderParseException("Cannot read clear-line from field file");
+                        } catch (NumberFormatException e) {
+                            throw new FinderParseException("Cannot read clear-line from field file");
+                        }
                     }
+            );
+            if (bestKnownSetup.isPresent()) {
+                FieldData fieldData = bestKnownSetup.get();
+
+                Optional<CommandLineWrapper> commandLineWrapper = fieldData.getCommandLineWrapper();
+                if (commandLineWrapper.isPresent()) {
+                    wrapper = new PriorityCommandLineWrapper(Arrays.asList(wrapper, commandLineWrapper.get()));
                 }
-        );
 
-        if (bestKnownSetup.isPresent()) {
-            FieldData fieldData = bestKnownSetup.get();
-
-            Optional<CommandLineWrapper> commandLineWrapper = fieldData.getCommandLineWrapper();
-            if (commandLineWrapper.isPresent()) {
-                wrapper = new PriorityCommandLineWrapper(Arrays.asList(wrapper, commandLineWrapper.get()));
+                int height = 4;
+                settings.setField(fieldData.toColoredField(), height);
+                settings.setMaxClearLine(height);
             }
-
-            int height = 4;
-            settings.setField(fieldData.toColoredField(), height);
-            settings.setMaxClearLine(height);
+        } else {
+            settings.setBestKnownSetup(null);
         }
+
 
 
 
