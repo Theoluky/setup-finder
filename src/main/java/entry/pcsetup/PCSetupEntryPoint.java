@@ -46,6 +46,7 @@ import searcher.PutterUsingHold;
 import searcher.common.validator.PerfectValidator;
 
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -157,6 +158,7 @@ public class PCSetupEntryPoint implements EntryPoint{
             Stopwatch stopwatch = Stopwatch.createStartedStopwatch();
             long last100time = 0;
             BlockField blockField = null;
+            int hundreds = 0;
 
             Field bestKnownSetup = settings.getBestKnownSetup();
             if (bestKnownSetup != null) {
@@ -170,6 +172,12 @@ public class PCSetupEntryPoint implements EntryPoint{
             }
 
             output(" Total fields found: " + first.size());
+
+            MyFile base = new MyFile("output/hundreds.txt");
+            base.mkdirs();
+            BufferedWriter bw;
+            try {bw = base.newBufferedWriter();}
+            catch (FileNotFoundException e) {return;}
             //output("Checking first 9 fields");
 
 
@@ -207,8 +215,15 @@ public class PCSetupEntryPoint implements EntryPoint{
                     output("Max Failures is now " + maxFailures);
                     blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
                 }
+                if (percent == 1.0) {
+                    break;
+//                    blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
+//                    try {bw.write(encodeColor(toCheckField, minoFactory, colorConverter, blockField));
+//                    bw.newLine();}
+//                    catch (IOException e) {};
+                }
 
-                if (highest_percent == 1.0) break;
+//                if (highest_percent == 1.0) break;
 
 
                 // use: percentCore.run(field, searchingPieces, maxClearLine, maxDepth)
