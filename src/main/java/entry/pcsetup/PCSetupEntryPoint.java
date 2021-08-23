@@ -137,7 +137,7 @@ public class PCSetupEntryPoint implements EntryPoint{
         MinoRotation minoRotation = MinoRotation.create();
         ColorConverter colorConverter = new ColorConverter();
         PerfectValidator perfectValidator = new PerfectValidator();
-        PutterUsingHold<Action> putter = new PutterUsingHold<>(minoFactory, perfectValidator);
+        PutterNoHold<Action> putter = new PutterNoHold<>(minoFactory, perfectValidator);
 
         output("Start Setup Finding");
         output();
@@ -216,11 +216,14 @@ public class PCSetupEntryPoint implements EntryPoint{
                     blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
                 }
                 if (percent == 1.0) {
-                    break;
-//                    blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
-//                    try {bw.write(encodeColor(toCheckField, minoFactory, colorConverter, blockField));
-//                    bw.newLine();}
-//                    catch (IOException e) {};
+//                    break;
+                    blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
+                    try {bw.write(encodeColor(toCheckField, minoFactory, colorConverter, blockField));
+                    bw.newLine();}
+                    catch (IOException e) {};
+                    output("Hundred: " + encodeColor(toCheckField, minoFactory, colorConverter, blockField));
+                    output(FieldView.toString(toCheckField,maxClearLine));
+                    maxFailures = 1;
                 }
 
 //                if (highest_percent == 1.0) break;
