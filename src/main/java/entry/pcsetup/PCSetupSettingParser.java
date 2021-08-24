@@ -104,7 +104,7 @@ public class PCSetupSettingParser extends SettingParser<PCSetupSettings>{
                     PCSetupOptions.BestKnownSetupPage.optName(),
                     PCSetupOptions.BestKnownSetup.optName(),
                     PCSetupOptions.BestKnownSetupPath.optName(),
-                    DEFAULT_FIELD_TXT,
+                    "input/bksf.txt",
                     Charset.forName(CHARSET_NAME),
                     Optional::of,
                     fieldLines -> {
@@ -139,6 +139,52 @@ public class PCSetupSettingParser extends SettingParser<PCSetupSettings>{
             }
         } else {
             settings.setBestKnownSetup(null);
+        }
+
+        if (wrapper.getStringOption(PCSetupOptions.StartField.optName()).isPresent() ||
+            wrapper.getStringOption(PCSetupOptions.StartFieldPath.optName()).isPresent()) {
+            Optional<FieldData> startField = Loader.loadFieldData(
+                    wrapper,
+                    fumenLoader,
+                    PCSetupOptions.StartFieldPage.optName(),
+                    PCSetupOptions.StartField.optName(),
+                    PCSetupOptions.StartFieldPath.optName(),
+                    "input/startfield.txt",
+                    Charset.forName(CHARSET_NAME),
+                    Optional::of,
+                    fieldLines -> {
+                        try {
+                            String firstLine = fieldLines.poll();
+                            int maxClearLine = Integer.valueOf(firstLine != null ? firstLine : "error");
+
+                            String fieldMarks = String.join("", fieldLines);
+                            ColoredField coloredField = ColoredFieldFactory.createColoredField(fieldMarks);
+
+                            CommandLine commandLineTetfu = commandLineFactory.parse(Arrays.asList("4"));
+                            CommandLineWrapper newWrapper = new NormalCommandLineWrapper(commandLineTetfu);
+
+                            return Optional.of(new FieldData(coloredField, newWrapper));
+                        } catch (NumberFormatException e) {
+                            throw new FinderParseException("Cannot read clear-line from field file");
+                        }
+                    }
+
+            );
+
+            if (startField.isPresent()) {
+                FieldData fieldData = startField.get();
+
+                Optional<CommandLineWrapper> commandLineWrapper = fieldData.getCommandLineWrapper();
+                if (commandLineWrapper.isPresent()) {
+                    wrapper = new PriorityCommandLineWrapper(Arrays.asList(wrapper, commandLineWrapper.get()));
+                }
+
+                int height = 4;
+                settings.setStart(fieldData.toColoredField(), height);
+            } else {
+                settings.setStart(null, 4);
+            }
+
         }
 
 

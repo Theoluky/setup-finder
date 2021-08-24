@@ -17,9 +17,11 @@ public enum PCSetupOptions {
     Threads(SingleArgOption.full("th", "threads", "number", "Specify number of used thread")),
     LogPath(SingleArgOption.full("lp", "log-path", "path", "File path of output log")),
     BestKnownSetup(SingleArgOption.full("bksf", "best-known-setup","v115@~","Specify fumen of best known setup")),
-    BestKnownSetupPage(SingleArgOption.full("bksp", "best-known-setup-page", "number", "Page of best known setup in fumen")),
-    BestKnownSetupPath(SingleArgOption.full("bksfp", "best-known-setup-path", "path", "Path to best known setup"));
-
+    BestKnownSetupPage(SingleArgOption.full("bksfpp", "best-known-setup-page", "number", "Page of best known setup in fumen")),
+    BestKnownSetupPath(SingleArgOption.full("bksfp", "best-known-setup-path", "path", "Path to best known setup")),
+    StartField(SingleArgOption.full("f", "start-field", "v115@~", "Specify field to start with")),
+    StartFieldPath(SingleArgOption.full("fp", "start-field-path", "path", "Path of starting field")),
+    StartFieldPage(SingleArgOption.full("fpp", "start-field-page", "number", "Page of starting field in fumen"));
     private final OptionBuilder optionBuilder;
 
     PCSetupOptions(OptionBuilder optionBuilder) {
