@@ -17,7 +17,7 @@ public class PCSetupSettings {
     private boolean isUsingHold = true;
     private int maxClearLine = 4;
     private Field bestKnownSetup = null;
-    private Field startfield = null;
+    private Field startField = null;
     private String logFilePath = DEFAULT_LOG_FILE_PATH;
     private List<String> setup_patterns = new ArrayList<>();
     private List<String> solve_patterns = new ArrayList<>();
@@ -38,6 +38,8 @@ public class PCSetupSettings {
     Field getBestKnownSetup() {
         return bestKnownSetup;
     }
+
+    Field getStartfield() {return startField;}
 
     int getMaxClearLine() {
         return maxClearLine;
@@ -91,7 +93,7 @@ public class PCSetupSettings {
                     if (coloredField.getBlockNumber(x, y) != EMPTY_BLOCK_NUMBER)
                         field.setBlock(x, y);
         }
-        this.startfield = field;
+        this.startField = field;
     }
 
     void setField(ColoredField coloredField, int height) {

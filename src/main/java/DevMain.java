@@ -13,8 +13,8 @@ public class DevMain {
 //        String command = "percent -t v115@wgF8FeG8CeB8GeC8DeF8GeB8JeAgH -p L,L,Z,S,Z,I,J,I,Z,T,O -c 7 --hold no";
 //        String command = "percent -t v115@wgF8FeG8CeB8GeC8DeF8GeB8JeAgH -p L,L,Z,S,Z,I,J,I,Z,T,O";
 //          String command = "percent -t v115@9gilwhDeR4glRpwhCeR4wwg0RpwhBeBtxwi0whCeBt?wwJeAgH -p *p4";
-         String command = "pcsetup -sp TILJ -p [^ILJ]!,I,[^I]p2 -d 180";
-//        String command = "pcsetup -sp TSZ -p *! -d 180";
+//         String command = "pcsetup -sp TILJ -p [^ILJ]!,I,[^I]p2 -d 180";
+        String command = "pcsetup -sp SZ -p *! -d 180 -f v115@ZhwwHeywJeAgH";
 //        String command = "percent -t v115@FfI8AeI8AeI8AeI8BeI8AeI8AeI8AeR8AeI8AeI8Ae?I8BeI8AeI8AeI8AeI8JeAgH -p III* -c 16";
 //        String command = "move -t v115@9gA8IeA8IeA8IeA8SeAgH -p [TIO]p2";
 //          String command = "move -t v115@vhAAgH -p IT";

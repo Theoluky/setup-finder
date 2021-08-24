@@ -130,7 +130,10 @@ public class PCSetupEntryPoint implements EntryPoint{
 
 
         // setup finding intialization:
-        Field field = FieldFactory.createField(4);
+//        Field field = FieldFactory.createField(4);
+        Field field = settings.getStartfield();
+        output("Starting field:");
+        output(FieldView.toString(field, 4));
 
         MinoFactory minoFactory = new MinoFactory();
         MinoShifter minoShifter = new MinoShifter();
@@ -178,24 +181,18 @@ public class PCSetupEntryPoint implements EntryPoint{
             BufferedWriter bw;
             try {bw = base.newBufferedWriter();}
             catch (FileNotFoundException e) {return;}
-            //output("Checking first 9 fields");
 
-
-            //Iterator<Order> iterator = first.descendingIterator();
-            //while (iterator.hasNext()) {
             for (Order order : first) {
                 checked++;
-//                if (checked > 10) break;
                 if (checked%500 == 0) {
                     System.out.println("Checked " + checked + "/" + first.size() + ". Last 500 took " + (stopwatch.timesincestart()-last100time) + "\r");
-//                    output("Last 100 took " + (stopwatch.timesincestart()-last100time));
                     last100time = stopwatch.timesincestart();
                 }
                 Stream<Operation> operationStream = order.getHistory().getOperationStream();
                 List<MinoOperationWithKey> operationWithKeys = OperationTransform.parseToOperationWithKeys(field, new Operations(operationStream), minoFactory, maxClearLine);
 //                BlockField blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
 
-                Field toCheckField = FieldFactory.createField(4);
+                Field toCheckField = FieldFactory.copyField(field);
                 for (MinoOperationWithKey operationWithKey : operationWithKeys) {
                     toCheckField.put(operationWithKey.getMino(), operationWithKey.getX(), operationWithKey.getY());
                     //output("   " +  operationWithKey.getMino() + operationWithKey.getX() + operationWithKey.getY());

@@ -185,6 +185,8 @@ public class PCSetupSettingParser extends SettingParser<PCSetupSettings>{
                 settings.setStart(null, 4);
             }
 
+        } else {
+            settings.setStart(null, 4);
         }
 
 

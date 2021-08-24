@@ -11,6 +11,17 @@ public class FieldFactory {
         throw new IllegalArgumentException("Field height should be equal or less than 24: height=" + maxHeight);
     }
 
+    public static Field copyField(Field src) {
+        if (src instanceof SmallField)
+            return new SmallField(((SmallField) src).getXBoard());
+        else if (src instanceof MiddleField)
+            return new MiddleField(((MiddleField) src).getXBoardLow(), ((MiddleField) src).getXBoardHigh());
+        else if (src instanceof LargeField)
+            return new LargeField(((LargeField) src).getXBoardLow(), ((LargeField) src).getXBoardMidLow(), ((LargeField) src).getXBoardMidHigh(), ((LargeField) src).getXBoardHigh());
+        throw new IllegalArgumentException("Invalid field supplied");
+
+    }
+
     public static Field createField(String marks, int maxHeight) {
         Field field = createField(maxHeight);
         field.merge(createField(marks));
