@@ -97,8 +97,14 @@ public class PCSetupEntryPoint implements EntryPoint{
         output("Queues:");
         List<String> solve_patterns = settings.getSolvePatterns();
         PatternGenerator solve_generator = Verify.patterns(solve_patterns);
-        for (String pattern : solve_patterns)
-            output("   " + pattern);
+        if (solve_patterns.size() > 100) {
+            for (int i = 0; i < 100; i++)
+                output("   " + solve_patterns.get(i));
+            output("...");
+        } else {
+            for (String pattern : solve_patterns)
+                output("   " + pattern);
+        }
         output("Using hold: " + (settings.isUsingHold() ? "use" : "avoid"));
         output("Drop: " + settings.getDropType().name().toLowerCase());
 
@@ -140,7 +146,7 @@ public class PCSetupEntryPoint implements EntryPoint{
         MinoRotation minoRotation = MinoRotation.create();
         ColorConverter colorConverter = new ColorConverter();
         PerfectValidator perfectValidator = new PerfectValidator();
-        PutterNoHold<Action> putter = new PutterNoHold<>(minoFactory, perfectValidator);
+        PutterUsingHold<Action> putter = new PutterUsingHold<>(minoFactory, perfectValidator);
 
         output("Start Setup Finding");
         output();
@@ -216,8 +222,9 @@ public class PCSetupEntryPoint implements EntryPoint{
 //                    break;
                     blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
                     try {bw.write(encodeColor(toCheckField, minoFactory, colorConverter, blockField));
-                    bw.newLine();}
-                    catch (IOException e) {};
+                    bw.newLine();
+                    bw.flush();}
+                    catch (IOException e) {output("Exception");};
                     output("Hundred: " + encodeColor(toCheckField, minoFactory, colorConverter, blockField));
                     output(FieldView.toString(toCheckField,maxClearLine));
                     maxFailures = 1;
@@ -242,7 +249,7 @@ public class PCSetupEntryPoint implements EntryPoint{
 
             output("Best success percent: " + highest_percent);
             if (highest_percent > 0) {
-                output("Best setup for " + piece.toString() + " with solve queue " + solve_patterns.toString() + ":");
+                output("Best setup for " + piece.toString() + " with solve queue " + solve_patterns.toString().substring(0, Math.min(solve_patterns.toString().length(), 100)) + ":");
                 output(FieldView.toString(bestSetup));
                 if (null != blockField)
                     output(encodeColor(field, minoFactory, colorConverter, blockField));
