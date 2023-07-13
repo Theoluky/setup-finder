@@ -1,5 +1,23 @@
-# solution-finder
+# solution-finder extended with pcsetup
+## Setup Finder
+This is an extension of knewjade's extremely popular sfinder project with support for automatic PC setup finding.
+The vast majority of  of the work included here comes directly from knewjhade, and I take credit only for the parts
+directly related to the `pcsetup` command. Simple instructions for use are copied below:
 
+Basic usage: `java -jar sfinder-pcsetup-v0.2.jar pcsetup -sp LSZO -p [^O]p6 -d 180 -bksf v115@HhglBeRpEeglBtRpR4CehlBtR4NeAgH`
+
+The command is `pcsetup`. Other normal sfinder features (like `percent`) *should* work, but I can't guarantee I didn't break something building this.
+
+Specify the pieces you want to use to build the setup using `-sp`, in the above example we are looking at all 4p setups it is possible to build using the queue `LSZO`. IMPORTANT: This build is order dependent (with hold), so if you want to be completely completely sure you've covered everything, you may need to run it again with the setup pieces specified in a different order.
+
+Specify the queue which will be used to solve the setup using `-p`, in the above example we are looking at a 4p setup for 7th which will take us to first, so well use the remaining 6 pieces from bag 10 to solve.
+
+Finally, you can use `-bksf <fumen code>` to specify the best-known setup field for the given queue. If you have one available, this will greatly improve the speed, since it will limit the search depth of the rest of the setups.
+
+Some other `sfinder` flags work as normal, for example `-d 180` to specify the use of 180 rotations, and `-f` in order to specify an initial field (all explored setups will place the setup pieces on top of the field specified in `-f`). Other stuff might work, it might not. Ping me or just try it if unsure.
+
+
+## Now the original README:
 テトリスの「パーフェクトクリア」「REN/Combo」「T-Spin」の手順などを探すためのツールです。  
 探索条件には、7種のミノ(ITSZJLO) の組み合わせや地形を自由に設定できます。
 
