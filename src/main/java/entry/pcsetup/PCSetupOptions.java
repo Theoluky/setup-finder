@@ -21,7 +21,8 @@ public enum PCSetupOptions {
     BestKnownSetupPath(SingleArgOption.full("bksfp", "best-known-setup-path", "path", "Path to best known setup")),
     StartField(SingleArgOption.full("f", "start-field", "v115@~", "Specify field to start with")),
     StartFieldPath(SingleArgOption.full("fp", "start-field-path", "path", "Path of starting field")),
-    StartFieldPage(SingleArgOption.full("fpp", "start-field-page", "number", "Page of starting field in fumen"));
+    StartFieldPage(SingleArgOption.full("fpp", "start-field-page", "number", "Page of starting field in fumen")),
+    PercentCutoff(SingleArgOption.full("co", "cutoff-percent", "number", "Specify cutoff percent for field search"));
     private final OptionBuilder optionBuilder;
 
     PCSetupOptions(OptionBuilder optionBuilder) {

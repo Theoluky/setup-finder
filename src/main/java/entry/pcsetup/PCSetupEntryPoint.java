@@ -169,8 +169,19 @@ public class PCSetupEntryPoint implements EntryPoint{
             BlockField blockField = null;
             int hundreds = 0;
 
+            // provided percent cutoff takes precedence over best known field
+
             Field bestKnownSetup = settings.getBestKnownSetup();
-            if (bestKnownSetup != null) {
+            double cutoffPercent = settings.getCutoffPercent();
+            if (cutoffPercent != 0.0) {
+//                output("Pre max: " + maxFailures);
+                maxFailures = (int)((maxFailures + 1) * (1 - cutoffPercent));
+                if (maxFailures == 0)
+                    maxFailures = 1;
+                highest_percent = cutoffPercent;
+                output("Maximum failures set to: " + maxFailures);
+            }
+            else if (bestKnownSetup != null) {
                 output("Best known setup:");
                 output(FieldView.toString(bestKnownSetup, 4));
                 percentCore.run(bestKnownSetup, searchingPieces, maxClearLine, solve_maxDepth, maxFailures);
@@ -206,7 +217,9 @@ public class PCSetupEntryPoint implements EntryPoint{
 //                output(FieldView.toString(toCheckField,maxClearLine));
                 percentCore.run(toCheckField, searchingPieces, maxClearLine, solve_maxDepth, maxFailures);
                 double percent = percentCore.getResultTree().getSuccessPercent();
-//                output(""+percent);
+//                double t = percentCore.getResultTree().getFailures();
+//                double h = percentCore.getResultTree().getSuccesses();
+//                output(""+percent + "    " + t + "    " + h);
                 if (percent > highest_percent) {
                     maxFailures = percentCore.getResultTree().getFailures();
                     highest_percent = percent;
@@ -220,6 +233,7 @@ public class PCSetupEntryPoint implements EntryPoint{
                 }
                 if (percent == 1.0) {
 //                    break;
+                    bestSetup = toCheckField;
                     blockField = OperationTransform.parseToBlockField(operationWithKeys, minoFactory, maxClearLine);
                     try {bw.write(encodeColor(toCheckField, minoFactory, colorConverter, blockField));
                     bw.newLine();

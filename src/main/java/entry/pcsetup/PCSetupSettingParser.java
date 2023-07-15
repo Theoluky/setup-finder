@@ -236,16 +236,19 @@ public class PCSetupSettingParser extends SettingParser<PCSetupSettings>{
 //        failedCount.ifPresent(settings::setFailedCount);
 
         // ログファイルの設定
-        Optional<String> logFilePath = wrapper.getStringOption(PercentOptions.LogPath.optName());
+        Optional<String> logFilePath = wrapper.getStringOption(PCSetupOptions.LogPath.optName());
         logFilePath.ifPresent(settings::setLogFilePath);
 
         // ホールドの設定
-        Optional<Boolean> isUsingHold = wrapper.getBoolOption(PercentOptions.Hold.optName());
+        Optional<Boolean> isUsingHold = wrapper.getBoolOption(PCSetupOptions.Hold.optName());
         isUsingHold.ifPresent(settings::setUsingHold);
 
         // スレッド数の設定
-        Optional<Integer> threadCount = wrapper.getIntegerOption(PercentOptions.Threads.optName());
+        Optional<Integer> threadCount = wrapper.getIntegerOption(PCSetupOptions.Threads.optName());
         threadCount.ifPresent(settings::setThreadCount);
+
+        Optional<Double> cutoffPercent = wrapper.getDoubleOption(PCSetupOptions.PercentCutoff.optName());
+        cutoffPercent.ifPresent(settings::setCutoffPercent);
 
         return Optional.of(settings);
     }

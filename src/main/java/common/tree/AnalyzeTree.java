@@ -107,6 +107,8 @@ public class AnalyzeTree {
         return rootElement.getSuccessPercent();
     }
 
+    public int getSuccesses() { return rootElement.successCounter; }
+
     public int getFailures() {
         return rootElement.allCounter - rootElement.successCounter;
     }

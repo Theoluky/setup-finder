@@ -25,6 +25,7 @@ public class PCSetupSettings {
     private int failedCount = 100;
     private int threadCount = -1;
     private DropType dropType = DropType.Softdrop;
+    private double cutoffPercent = 0.0;
 
     // ********* Getter ************
     public boolean isUsingHold() {
@@ -70,6 +71,8 @@ public class PCSetupSettings {
     int getThreadCount() {
         return threadCount;
     }
+
+    double getCutoffPercent() { return cutoffPercent; }
 
     // ********* Setter ************
     public void setMaxClearLine(int maxClearLine) {
@@ -129,6 +132,10 @@ public class PCSetupSettings {
 
     void setThreadCount(int thread) {
         this.threadCount = thread;
+    }
+
+    void setCutoffPercent(double cutoff) {
+        this.cutoffPercent = cutoff;
     }
 
     void setDropType(String type) throws FinderParseException {
