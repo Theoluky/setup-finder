@@ -250,6 +250,9 @@ public class PCSetupSettingParser extends SettingParser<PCSetupSettings>{
         Optional<Double> cutoffPercent = wrapper.getDoubleOption(PCSetupOptions.PercentCutoff.optName());
         cutoffPercent.ifPresent(settings::setCutoffPercent);
 
+        Optional<Boolean> setupUsingHold = wrapper.getBoolOption(PCSetupOptions.SetupHold.optName());
+        setupUsingHold.ifPresent(settings::setSetupUsingHold);
+
         return Optional.of(settings);
     }
 }

@@ -146,7 +146,9 @@ public class PCSetupEntryPoint implements EntryPoint{
         MinoRotation minoRotation = MinoRotation.create();
         ColorConverter colorConverter = new ColorConverter();
         PerfectValidator perfectValidator = new PerfectValidator();
-        PutterUsingHold<Action> putter = new PutterUsingHold<>(minoFactory, perfectValidator);
+        PutterUsingHold<Action> putterhold = new PutterUsingHold<>(minoFactory, perfectValidator);
+        PutterNoHold<Action> putterwithouthold = new PutterNoHold<>(minoFactory, perfectValidator);
+        boolean setupUsingHold = settings.isSetupUsingHold();
 
         output("Start Setup Finding");
         output();
@@ -157,8 +159,11 @@ public class PCSetupEntryPoint implements EntryPoint{
         for (Pieces piece : pieces) {
             String using = piece.blockStream().map(Piece::getName).collect(Collectors.joining());
             output("   -> " + using);
-            TreeSet<Order> first = putter.first(field, piece.getPieceArray(), new LockedCandidate(minoFactory, minoShifter, minoRotation, maxClearLine), maxClearLine, setup_maxDepth);
-
+            TreeSet<Order> first;
+            if (setupUsingHold)
+                first = putterhold.first(field, piece.getPieceArray(), new LockedCandidate(minoFactory, minoShifter, minoRotation, maxClearLine), maxClearLine, setup_maxDepth);
+            else
+                first = putterwithouthold.first(field, piece.getPieceArray(), new LockedCandidate(minoFactory, minoShifter, minoRotation, maxClearLine), maxClearLine, setup_maxDepth);
             double highest_percent = 0.0;
             Field bestSetup = field;
             int maxFailures = normalEnumeratePieces.getCounter();

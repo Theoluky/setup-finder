@@ -26,6 +26,7 @@ public class PCSetupSettings {
     private int threadCount = -1;
     private DropType dropType = DropType.Softdrop;
     private double cutoffPercent = 0.0;
+    private boolean setupUsingHold = true;
 
     // ********* Getter ************
     public boolean isUsingHold() {
@@ -73,6 +74,8 @@ public class PCSetupSettings {
     }
 
     double getCutoffPercent() { return cutoffPercent; }
+
+    boolean isSetupUsingHold() {return setupUsingHold; }
 
     // ********* Setter ************
     public void setMaxClearLine(int maxClearLine) {
@@ -137,6 +140,8 @@ public class PCSetupSettings {
     void setCutoffPercent(double cutoff) {
         this.cutoffPercent = cutoff;
     }
+
+    void setSetupUsingHold(boolean setupUsingHold) {this.setupUsingHold = setupUsingHold; }
 
     void setDropType(String type) throws FinderParseException {
         switch (type.trim().toLowerCase()) {
